@@ -13,6 +13,7 @@ Draft date:
 ## Depencency
 Dependencies for fnumts:
 
+* pysam(version: 0.22.0)
 ## Installation
 
 ### Conda
