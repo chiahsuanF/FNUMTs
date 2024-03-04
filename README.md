@@ -86,9 +86,9 @@ export PATH=$PWD/fnumts/:$PATH
 |-bam|Import aligned BAM file|False|
 |-o|Output directory |fnumts|
 |-r|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/chrM.fa|
-|-d|Maximun distance for merging intervals|10|
-|-l|Minmiun lenght for insertion sequence|10|
-|-s|Minimun support reads for insertion reads|5|
+|-d|Maximun number of distance for merging intervals|10|
+|-l|Minmiun number of lenght for insertion sequence|10|
+|-s|Minimun number of support reads for insertion reads|5|
 
 ## Use cases
 fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa and required indexed by using BWA.
