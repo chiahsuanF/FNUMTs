@@ -9,7 +9,10 @@ Draft date:
 
 ## Quick Start
 ```sh
-conda install
+git clone https://github.com/chiahsuanF/fnumts.git
+cd fnumts/
+```
+```
 ./fnumts_main.py -bam <index.bam> [option]
 ```
 
@@ -58,15 +61,25 @@ Dependencies for fnumts:
 
 ### Conda
 ```
-conda create -n fnumts
-conda activate fnumts
-conda install -c bioconda fnumts
+conda create -n fn python=3
+conda activate fn
+
+conda install bioconda::bwa
+conda install bioconda::snpeff
+conda install bioconda::bialign
+pip install pysam
+pip install argparse
+pip install pandas
+
 ```
 ### Git
 ```
-git clone
+git clone https://github.com/chiahsuanF/fnumts.git
 ```
-
+Next, add the directory to PATH:
+```
+export PATH=$PWD/fnumts/:$PATH
+```
 ## General usage
 | Option | Description| Default|
 | :------------|:-------------|:-------------|
