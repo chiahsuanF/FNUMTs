@@ -146,8 +146,8 @@ The output file directory includes:
 
 | File name | Description| 
 | :------------|:-------------|
-|fnumts.ann.vcf|Standard VCF file of find NUMTs and annotation. The chromosome, length, supportread, mapping quality, number of missmatch, start position, end position, type, annotation for each NUMT.|
-|fnumts.vcf|Temporery VCF file of finding NUMTs. The chromosome, length, supportread, mapping quality, number of missmatch, start position, end position, type for each NUMT.|  
+|fnumts.ann.vcf|Standard VCF file of find NUMTs and annotation. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type, annotation for each NUMT.|
+|fnumts.vcf|Temporery VCF file of finding NUMTs. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type for each NUMT.|  
 |fnumts.sam|Temporary SAM archive consistent with chrM.|
 |clusters.ins.srot.sam|Temporary SAM archive of the cluster aligned with chrM.|
 |poa_output|Temporary files during each cluster seeking consensus.|
