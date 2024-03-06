@@ -86,6 +86,7 @@ export PATH=$PWD/fnumts/:$PATH
 |-bam|Import aligned BAM file|False|
 |-o|Output directory |fnumts|
 |-r|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/chrM.fa|
+|-sr|Import reference for snpEff annotation|hg38|
 |-d|Maximun number of distance for merging intervals|10|
 |-l|Minmiun number of lenght for insertion sequence|10|
 |-s|Minimun number of support reads for insertion reads|5|
