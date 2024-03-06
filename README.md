@@ -97,16 +97,19 @@ fnumts required input as an aligned BAM file with header. Mapping raw data sugge
 ```
 minimap2 -as map-hifi ref.fa sample.fq > aligned.sam
 samtools sort aligned.sam -o aligned.bam
-samtools index -b aligned.bam
+samtools index -b index.bam
 ```
-after this process, user will get a index.bam file
+after this process, user will get a index.bam file.    
+
+For more detail, please look at [Minimap2 GitHub pages](https://github.com/lh3/minimap2) and [SAMtools GitHub pages](https://github.com/samtools/samtools).
 
 ### index reference chrM.fa required with BWA:
-for fnumts, only needs to index reference chrM.fa
+for fnumts, only needs to index reference chrM.fa.
 ```
 bwa index ref_chrM.fa
 ```
-and user will see ref_chrM.fa file with five new files, ref_chrM.fa.amb, ref_chrM.fa.ann, ref_chrM.fa.bwt, ref_chrM.fa.pac, and ref_chrM.fa.sa. Next, copy the direct path of ref_chrM.fa as reference input index_ref_chrM.fa.
+and user will see ref_chrM.fa file with five new files, ref_chrM.fa.amb, ref_chrM.fa.ann, ref_chrM.fa.bwt, ref_chrM.fa.pac, and ref_chrM.fa.sa. Next, copy the direct path of ref_chrM.fa as reference input index_ref_chrM.fa.     
+For more detail, please look at [BWA GitHub pages](https://github.com/lh3/bwa).
 
 ### fnumts can be using with full function:
 ```
