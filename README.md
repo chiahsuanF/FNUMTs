@@ -55,7 +55,7 @@ Dependencies for fnumts:
 * pandas(version 2.1.1)
 * bwa(version 0.7.17)
 * bsalign(version 1.2.1)
-* snpEff(version)
+* snpEff(version 5.2)(with java version 1.11)
   
 ## Installation
 
