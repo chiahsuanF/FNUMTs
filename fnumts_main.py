@@ -14,7 +14,6 @@ from fnumts_sortcigar import *
 from fnumts_process import *
 from fnumts_generate import *
 
-
 args = parse_args()
 writepath = args.outpath
 
