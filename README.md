@@ -96,7 +96,7 @@ fnumts required input as an aligned BAM file with header. Mapping raw data sugge
 
 ### mipping long-read raw data with minimap2 and samtools:
 ```
-minimap2 -as map-hifi ref.fa sample.fq > aligned.sam
+minimap2 -ax map-hifi ref.fa sample.fq > aligned.sam
 samtools sort aligned.sam -o aligned.bam
 samtools index -b index.bam
 ```
