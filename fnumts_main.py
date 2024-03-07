@@ -5,27 +5,16 @@ import pandas as pd
 import argparse
 import sys
 import pysam
+from fnumts_check import *
 from fnumts_cluster import *
 from fnumts_bedtools import *
 from fnumts_writevcf import *
+from fnumts_functions import *
+from fnumts_sortcigar import *
+from fnumts_process import *
+from fnumts_generate import *
 
-def check_input_arguments(args):
-    if not args.bam:
-        print("Error: No input file given.")
-        sys.exit(1)
 
-def make_output_directory(output_path):
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-
-def parse_args():
-    parser = argparse.ArgumentParser(description='finding NUMTs insertion')
-    parser.add_argument('-bam', type=str, default=False)
-    parser.add_argument('-o', '--outpath', type=str, default='./ffnumt_out/')
-    parser.add_argument('-d', '--distance', type=int, default='10', help = 'Maximun distance for merging intervals')
-    parser.add_argument('-l', '--lenght', type=int, default='10', help = 'Minmiun lenght for insertion sequence')
-    parser.add_argument('-s', '--supportread', type=int, default='5', help = 'Minimun support reads for insertion reads')
-    return parser.parse_args()
 args = parse_args()
 writepath = args.outpath
 
@@ -74,15 +63,13 @@ pre_data = read_data(input_file_58)
 processed_data = add_header_column(pre_data)
 save_to_fna(processed_data, output_file_59)
 os.chdir(writepath)
-os.system("/share/apps/rc/software/BWA/0.7.17-GCC-8.3.0/bin/bwa mem -t4 /data/scratch/fanc/fnumts/ref/chrM.fa 59_pre_filename.fna > clusters.ins.srot.sam")
+os.system("/share/apps/rc/software/BWA/0.7.17-GCC-8.3.0/bin/bwa mem -t4 " + args.reference + " 59_pre_filename.fna > clusters.ins.srot.sam")
 
 samfile1 = pysam.AlignmentFile("clusters.ins.srot.sam", "r")
-iter = samfile1.fetch()
-with open ('60_.txt', 'w') as pbs1:
-    for read1 in iter:
-        if read1.reference_name == 'chrM':
+with open('60_.txt', 'w') as pbs1:
+    for read1 in samfile1.fetch():
+        if read1.tid != -1 and samfile1.getrname(read1.tid) == 'chrM':
             pbs1.write(read1.query_name + '\n')
-pbs1.close()
 
 
 logfile = open('login_note', 'a')
@@ -123,7 +110,7 @@ logfile.write('End calling bsalign poa ...\n')
 logfile.close()
 
 
-os.system("/share/apps/rc/software/BWA/0.7.17-GCC-8.3.0/bin/bwa mem -k13 -T0 /data/scratch/fanc/fnumts/ref/chrM.fa final.align.fa > fnumts.sam")
+os.system("/share/apps/rc/software/BWA/0.7.17-GCC-8.3.0/bin/bwa mem -k13 -T0 " + args.reference + " final.align.fa > fnumts.sam")
 
 logfile = open('login_note', 'a')
 logfile.write('Start writing VCF file and variant annotation ...\n')
@@ -152,13 +139,16 @@ snp3 = pd.read_csv('71_.txt', sep="\t| ", engine='python', header=None)
 snp3.columns = ["chr", "start_pos", "depth", "lenght", "seq", "MQ", "M_start", "NM"]
 
 with open('fnumts.vcf', 'w') as snp4:
-    vcf_rows = snp3.apply(generate_vcf_row, axis=1)
+    vcf_rows = []
+    for index, row in snp3.iterrows():
+        if row["chr"] != "chrM":  # Check if chr is not chrM
+            vcf_rows.append(generate_vcf_row(row))
     snp4.write("\n".join(vcf_rows))
 
 os.mkdir('poa_output')
 os.system('mv -t poa_output *.rename.fa')
-os.system('rm *.fa *.txt 59_pre_filename.fna fastalist')
-os.system("java -Xmx8g -jar /data/scratch/fanc/app/snpEff/snpEff.jar  -v hg38 fnumts.vcf > fnumts.ann.vcf")
+os.system('rm *.txt *.fa 59_pre_filename.fna fastalist')
+os.system("java -Xmx8g -jar /data/scratch/fanc/app/snpEff/snpEff.jar -v " + args.sref + " fnumts.vcf > fnumts.ann.vcf")
 
 
 logfile = open('login_note', 'a')
