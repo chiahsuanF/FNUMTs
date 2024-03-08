@@ -20,7 +20,7 @@ cd fnumts/
 # Finding NUMTs with indexed bam. The reference using human hg38.
 ./fnumts_main.py -bam <index.bam>
 
-# example usage:
+# Example usage:
 ./fnumts_main.py -bam index_human_hg38.bam
 ```
 
@@ -28,7 +28,7 @@ cd fnumts/
 # Finding NUMTs with indexed bam. The reference using other species' chrM indexed by BWA.
 ./fnumts_main.py -bam <index.bam> -r <index_ref_chrM.fa>
 
-# example usage:
+# Example usage:
 ./fnumts_main.py -bam index.bam -r path/directory/index_ref_chrM.fa
 ```
 
@@ -37,13 +37,13 @@ cd fnumts/
 # Adjust distance, length, and support reads.
 ./fnumts_main.py -bam <index.bam> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa>
 
-# example usage:
+# Example usage:
 ./fnumts_main.py -bam index.bam -d 20 -l 20 -s 10 -r path/directory/index_ref_chrM.fa
 ```
 
 ## Description
-fnumts is a tool for finding insertion mitochondria DNA in nuclear genome. fnumts can detect NUMT length from 1 bp up to whole mitochondira DNA.  
-###
+fnumts is a tool for finding insertion mitochondria DNA in nuclear genome. fnumts can detect NUMT length from 1 bp up to whole mitochondira DNA.      
+
 The input file should be a long-read indexed BAM(PacBio Hifi) file. The input reference chrM needs to be same as aligned bam file reference, and needs to be indexed by BWA. The output is a standard VCF file which passed filter. This program was test on a x86_64 Linux system with 40GB physical memory.
 
 ## Depencency
@@ -116,7 +116,10 @@ For more detail, please look at [BWA GitHub pages](https://github.com/lh3/bwa).
 If user has trouble to get chrM fasta file, grep_chrM.py is a script for user to get only chrM sequence from reference FASTA file and save into FASTA format.  
 ```
 # Usage
-./fnumt/grep_chrM.py
+./grep_chrM.py -i <input_fasta> [-o output.fa] [-c chrM_name_from_reference_fa]
+
+# Example
+./grep_chrM.py -i GRCh38.p13.genome.fa.fa
 ```
 
 ### fnumts can be using with full function:
