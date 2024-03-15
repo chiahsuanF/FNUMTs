@@ -121,7 +121,7 @@ If user has trouble to get chrM fasta file, grep_chrM.py is a script for user to
 # Example
 ./grep_chrM.py -i GRCh38.p13.genome.fa
 ```
-
+For more reference download, please look at [UCSC](https://hgdownload2.soe.ucsc.edu/downloads.html) or [NCBI](https://www.ncbi.nlm.nih.gov/).
 ### fnumts can be using with full function:
 ```
 ./fnumts_main.py -bam <index.bam> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa>
