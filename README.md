@@ -53,7 +53,7 @@ Dependencies for fnumts:
 * pysam(version 0.22.0)
 * argparse(version 1.4.0)
 * pandas(version 2.1.1)
-* bwa(version 0.7.17)
+* BWA(version 0.7.17)
 * bsalign(version 1.2.1)
 * snpEff(version 5.2)(with java version 1.11 or later)
   
@@ -95,6 +95,7 @@ export PATH=$PWD/fnumts/:$PATH
 fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa and required indexed by using BWA.
 
 ### mipping long-read raw data with minimap2 and samtools:
+Download the reference FASTA file and sample's FASTQ file, then:
 ```
 minimap2 -ax map-hifi ref.fa sample.fq > aligned.sam
 samtools sort aligned.sam -o aligned.bam
@@ -136,24 +137,29 @@ For more reference download, please look at [UCSC](https://hgdownload2.soe.ucsc.
 ### 1. -r, --reference, input indexed reference chrM.fa.
 Option -r, --refernece, is for user can input other human chrM reference or other species chrM reference. The refernce need to be same as input indexed BAM file refernce.
 ```
-./fnumts_main.py -bam <index.bam> -r <path/directory/index_ref_chrM.fa>
+./fnumts_main.py -bam <index.bam> [-r <path/directory/index_ref_chrM.fa>]
 ```
 ### 2. -d, --distance, maximun number of distance for merging intervals.
 As this option, user can adjust the distance of each cluster range. 
 ```
-./fnumts_main.py -bam <index.bam> -d <int>
+./fnumts_main.py -bam <index.bam> [-d <int>]
 ```
 ### 3. -l, --lenght, minmiun number of lenght for insertion sequence. 
 For this option, user can adjust the lenght of the sequence. For example, if user set the number to 20, then fnumts will filter out the length of NUMTs less than 20bps.
 ```
-./fnumts_main.py -bam <index.bam> -l <int>
+./fnumts_main.py -bam <index.bam> [-l <int>]
 ```
 ### 4. -s, --supportread, minimun number of support reads for insertion reads.
 -s, --supportread, is an option for user can adjust the support read number. For more accurate results, the number of support read needs to be higher.
 ```
-./fnumts_main.py -bam <index.bam> -s <int>
+./fnumts_main.py -bam <index.bam> [-s <int>]
 ```
-
+### 5. -sr, --sref, Import reference for snpEff annotation.
+the option -sr is for users to adjust the reference to do annotation on snpEff.
+```
+./ fnumts_main.py -bam <index.bam> [-sr reference]
+```
+For more detail, please look at [snpEff GitHub pages](https://pcingola.github.io/SnpEff/). 
 
 ## Output files
 The output file directory includes:
@@ -165,3 +171,11 @@ The output file directory includes:
 |fnumts.sam|Temporary SAM archive consistent with chrM.|
 |clusters.ins.srot.sam|Temporary SAM archive of the cluster aligned with chrM.|
 |poa_output|Temporary files during each cluster seeking consensus.|
+
+## Additional information
+1. [pysam](https://pysam.readthedocs.io/en/latest/api.html)
+2. [argparse](https://docs.python.org/3/library/argparse.html)
+3. [pandas](https://devdocs.io/pandas~0.25/)
+4. [BWA](https://bio-bwa.sourceforge.net/bwa.shtml)
+5. [bsalign](https://github.com/ruanjue/bsalign)
+6. [snpEff](https://pcingola.github.io/SnpEff/)
