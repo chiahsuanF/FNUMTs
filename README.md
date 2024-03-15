@@ -119,7 +119,7 @@ If user has trouble to get chrM fasta file, grep_chrM.py is a script for user to
 ./grep_chrM.py -i <input_fasta> [-o output.fa] [-c chrM_name_from_reference_fa]
 
 # Example
-./grep_chrM.py -i GRCh38.p13.genome.fa.fa
+./grep_chrM.py -i GRCh38.p13.genome.fa
 ```
 
 ### fnumts can be using with full function:
