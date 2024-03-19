@@ -149,6 +149,11 @@ os.system('mv -t poa_output *.rename.fa')
 os.system('rm *.txt *.fa 59_pre_filename.fna fastalist')
 os.system("java -Xmx8g -jar /data/scratch/fanc/app/snpEff/snpEff.jar -v " + args.sref + " fnumts.vcf > fnumts.ann.vcf")
 
+fa_format = pd.read_csv('fnumts.vcf', sep= '\t', header = None)
+
+with open('numt.fa', 'w') as n:
+    for index, row in fa_format.iterrows():
+        n.write(f'>{row[0]}_{row[1]}\n{row[4]}\n')
 
 logfile = open('login_note', 'a')
 logfile.write('End writing VCF file and variant annotation ...\n')
