@@ -175,8 +175,9 @@ The output file directory includes:
 
 ## Additional information
 1. [pysam](https://pysam.readthedocs.io/en/latest/api.html)
-2. [argparse](https://docs.python.org/3/library/argparse.html)
-3. [pandas](https://devdocs.io/pandas~0.25/)
-4. [BWA](https://bio-bwa.sourceforge.net/bwa.shtml)
-5. [bsalign](https://github.com/ruanjue/bsalign)
-6. [snpEff](https://pcingola.github.io/SnpEff/)
+2. [DeBreak](https://www.nature.com/articles/s41467-023-35996-1)
+3. [argparse](https://docs.python.org/3/library/argparse.html)
+4. [pandas](https://devdocs.io/pandas~0.25/)
+5. [BWA](https://bio-bwa.sourceforge.net/bwa.shtml)
+6. [bsalign](https://github.com/ruanjue/bsalign)
+7. [snpEff](https://pcingola.github.io/SnpEff/)
