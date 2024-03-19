@@ -94,7 +94,7 @@ export PATH=$PWD/fnumts/:$PATH
 ## Use cases
 fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa and required indexed by using BWA.
 
-### mipping long-read raw data with minimap2 and samtools:
+### Mipping long-read raw data with minimap2 and samtools:
 Download the reference FASTA file and sample's FASTQ file, then:
 ```
 minimap2 -ax map-hifi ref.fa sample.fq > aligned.sam
@@ -105,7 +105,7 @@ after this process, user will get a index.bam file.
 
 For more detail, please look at [Minimap2 GitHub pages](https://github.com/lh3/minimap2) and [SAMtools GitHub pages](https://github.com/samtools/samtools).
 
-### index reference chrM.fa required with BWA:
+### Index reference chrM.fa required with BWA:
 For fnumts, only needs to index reference chrM.fa.  
 ```
 bwa index ref_chrM.fa
@@ -114,6 +114,7 @@ and user will see ref_chrM.fa file with five new files, ref_chrM.fa.amb, ref_chr
 
 For more detail, please look at [BWA GitHub pages](https://github.com/lh3/bwa).   
 
+### Get chrM FASTA file
 If user has trouble to get chrM fasta file, grep_chrM.py is a script for user to get only chrM sequence from reference FASTA file and save into FASTA format.  
 ```
 # Usage
