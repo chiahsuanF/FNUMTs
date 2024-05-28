@@ -174,6 +174,23 @@ The output file directory includes:
 |clusters.ins.srot.sam|Temporary SAM archive of the cluster aligned with chrM.|
 |poa_output|Temporary files during each cluster seeking consensus.|
 
+## Output files format
+### fnumts.paf
+|Col|Type|Description|
+|--:|:---|:-------------|
+|1|str|Query name|
+|2|int|Query length|
+|3|int|Query start|
+|4|int|Query end|
+|5|str|Relative strand: "+" or "-"|
+|6|str|Target name|
+|7|int|Target length|
+|8|int|Target start|
+|9|int|Target end|
+|10|int|Number of mismatch|
+|11|int|Alignment block length|
+
+
 ## Additional information
 1. [pysam](https://pysam.readthedocs.io/en/latest/api.html)
 2. [DeBreak](https://www.nature.com/articles/s41467-023-35996-1)
