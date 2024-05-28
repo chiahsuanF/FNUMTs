@@ -168,13 +168,41 @@ The output file directory includes:
 | File name | Description| 
 | :------------|:-------------|
 |fnumts.ann.vcf|Standard VCF file of find NUMTs and annotation. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type, annotation for each NUMT.|
-|fnumts.vcf|Temporery VCF file of finding NUMTs. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type for each NUMT.|  
+|fnumts.vcf|VCF file of finding NUMTs. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type for each NUMT.|  
 |numt.fa|Standard FASTA format file that saves all the NUMT sequences.|
 |fnumts.sam|Temporary SAM archive consistent with chrM.|
 |clusters.ins.srot.sam|Temporary SAM archive of the cluster aligned with chrM.|
 |poa_output|Temporary files during each cluster seeking consensus.|
 
 ## Output files format
+### fnumts.vcf
+|Col|Type|Description|
+|-:|:---|:-------------|
+|1|str|Target chromosome|
+|2|int|Target position|
+|3|str||
+|4|str||
+|5|str||
+|6|str||
+|7|str||
+|8|str|info|
+
+```
+##fileformat=VCFv4.2  
+##FILTER=<ID=PASS,Description="All filters passed">
+##source=Fnumts
+##INFO=<ID=CHR,Number=1,Type=String,Description="Target chromosome for NUMT sequence">
+##INFO=<ID=LEN,Number=1,Type=Integer,Description="Length of NUMTs sequence">
+##INFO=<ID=SUPREAD,Number=1,Type=Integer,Description="Number of support reads">
+##INFO=<ID=MAPQ,Number=1,Type=Integer,Description="Mapping quality">
+##INFO=<ID=NM,Number=1,Type=Integer,Description="Number of mismatches of NUMTs sequence">
+##INFO=<ID=chrMSPos,Number=1,Type=Integer,Description="Mitochondrial start coordinate of inserted sequence">
+##INFO=<ID=chrMEPos,Number=1,Type=Integer,Description="Mitochondrial end coordinate of inserted sequence">
+##INFO=<ID=TYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=METHOD,Number=1,Type=String,Description="Type of approach used to detect NUMT">
+##CommandLine=fnumts_main.py 
+```
+
 ### fnumts.paf
 |Col|Type|Description|
 |--:|:---|:-------------|
