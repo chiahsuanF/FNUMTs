@@ -173,7 +173,7 @@ The output file directory includes:
 
 | File name | Description| 
 | :------------|:-------------|
-|fnumts.vcf|VCF file of finding NUMTs. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type for each NUMT.|  
+|fnumts.vcf|VCF file of finding NUMTs. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type for each NUMT, mapping quality, and depth.|  
 
 ## Output files format
 ### fnumts.vcf
@@ -187,6 +187,11 @@ The output file directory includes:
 |6|int|QUAL|
 |7|str|FILTER|
 |8|str|INFO|
+
+#### QUAL system
+Depend on the value of Number of missmatch, VAF, and Mapping Quality
+score = (0.3 * normalized_mismatches + 0.4 * normalized_vaf + 0.3 * normalized_mq) * 100
+if score is lower than 40.00, FILTER will print LowQuality.
 
 ```
 ##fileformat=VCFv4.2
@@ -205,6 +210,8 @@ The output file directory includes:
 ##INFO=<ID=VAF,Number=1,Type=Integer,Description="Variant allele frequency at the NUMT breakpoint">
 ##INFO=<ID=DEPTH,Number=1,Type=Integer,Description="Total depth of coverage at the NUMT breakpoints">
 ##CommandLine=fnumts_main.py -b test.bam
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO
+chr11   4635114 FN1     N       ATCCCGCACAAGAGTGCTACTCTCCTCGCTCCGGGCCCA 100.00  PASS    CHR=chr11;LEN=39;SUPREAD=42;NM=0;MQ=60;chrMSPos=16423;chrMEPos=16462;TYPE=NUMT;METHOD=Fnumt;VAF=1.00;DEPTH=42
 ```
 
 ### fnumts.paf
