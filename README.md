@@ -44,7 +44,7 @@ cd fnumts/
 ## Description
 fnumts is a tool for finding insertion mitochondria DNA in nuclear genome. fnumts can detect NUMT length from 1 bp up to whole mitochondira DNA.      
 
-The input file should be a long-read indexed BAM(PacBio Hifi) file. The input reference chrM needs to be same as aligned bam file reference, and needs to be indexed by BWA. The output is a standard VCF file which passed filter. This program was test on a x86_64 Linux system with 40GB physical memory.
+The input file should be a long-read indexed BAM(PacBio Hifi and Oxford Nanopore) file. The input reference chrM needs to be same as aligned bam file reference, and needs to be indexed by BWA. The output is a standard VCF file which passed filter. This program was test on a x86_64 Linux system with 40GB physical memory.
 
 ## Depencency
 Dependencies for fnumts:
@@ -83,7 +83,7 @@ export PATH=$PWD/fnumts/:$PATH
 ## General usage
 | Option | Description| Default|
 | :------------|:-------------|:-------------|
-|-t|input datatype, hifi, ont, or cram||hifi
+|-t|Input datatype, hifi, ont, or cram|hifi|
 |-b|Import aligned BAM file|False|
 |-o|Output directory |./fnumts|
 |-r|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/chrM.fa|
@@ -95,14 +95,14 @@ export PATH=$PWD/fnumts/:$PATH
 ## Use cases
 fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa and required indexed by using BWA.
 
-### Mipping long-read raw data with minimap2 and samtools:
+### Mapping long-read raw data with minimap2 and samtools:
 Download the reference FASTA file and sample's FASTQ file, then:
 ```
 minimap2 -ax map-hifi ref.fa sample.fq > aligned.sam
 samtools sort aligned.sam -o aligned.bam
-samtools index -b index.bam
+samtools index -b aligned.bam
 ```
-after this process, user will get a index.bam file.    
+after this process, user will get aligned.bam file and aligned.bam.bai file.    
 
 For more detail, please look at [Minimap2 GitHub pages](https://github.com/lh3/minimap2) and [SAMtools GitHub pages](https://github.com/samtools/samtools).
 
@@ -189,8 +189,12 @@ The output file directory includes:
 |8|str|INFO|
 
 #### QUAL system
-Depend on the value of Number of missmatch, VAF, and Mapping Quality
+Depend on the value of Number of missmatch, VAF, and Mapping Quality.
+
+
 score = (0.3 * normalized_mismatches + 0.4 * normalized_vaf + 0.3 * normalized_mq) * 100
+
+
 if score is lower than 40.00, FILTER will print LowQuality.
 
 ```
