@@ -178,7 +178,7 @@ The output file directory includes:
 ## Output files format
 ### fnumts.vcf
 |Col|Type|Description|
-|-:|-:-|:-------------|
+|-:|:--|:-------------|
 |1|str|Target chromosome|
 |2|int|Target position|
 |3|str|ID|
