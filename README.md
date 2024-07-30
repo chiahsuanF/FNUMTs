@@ -13,32 +13,32 @@ git clone https://github.com/chiahsuanF/fnumts.git
 cd fnumts/
 ```
 ```
-./fnumts_main.py -bam <index.bam> [option]
+./fnumts_main.py -b <index.bam> [option]
 ```
 
 ```sh
 # Finding NUMTs with indexed bam. The reference using human hg38.
-./fnumts_main.py -bam <index.bam>
+./fnumts_main.py -b <index.bam>
 
 # Example usage:
-./fnumts_main.py -bam index_human_hg38.bam
+./fnumts_main.py -b index_human_hg38.bam
 ```
 
 ```sh
 # Finding NUMTs with indexed bam. The reference using other species' chrM indexed by BWA.
-./fnumts_main.py -bam <index.bam> -r <index_ref_chrM.fa>
+./fnumts_main.py -b <index.bam> -r <index_ref_chrM.fa>
 
 # Example usage:
-./fnumts_main.py -bam index.bam -r path/directory/index_ref_chrM.fa
+./fnumts_main.py -b index.bam -r path/directory/index_ref_chrM.fa
 ```
 
 ```sh
 # Finding NUMTs with indexed bam. The reference using other species' chrM.fa indexed by BWA.
 # Adjust distance, length, and support reads.
-./fnumts_main.py -bam <index.bam> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa>
+./fnumts_main.py -b <index.bam> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa>
 
 # Example usage:
-./fnumts_main.py -bam index.bam -d 20 -l 20 -s 10 -r path/directory/index_ref_chrM.fa
+./fnumts_main.py -b index.bam -d 20 -l 20 -s 10 -r path/directory/index_ref_chrM.fa
 ```
 
 ## Description
@@ -55,7 +55,7 @@ Dependencies for fnumts:
 * pandas(version 2.1.1)
 * BWA(version 0.7.17)
 * bsalign(version 1.2.1)
-* snpEff(version 5.2)(with java version 1.11 or later)
+* #snpEff(version 5.2)(with java version 1.11 or later)
   
 ## Installation
 
@@ -83,13 +83,14 @@ export PATH=$PWD/fnumts/:$PATH
 ## General usage
 | Option | Description| Default|
 | :------------|:-------------|:-------------|
-|-bam|Import aligned BAM file|False|
-|-o|Output directory |fnumts|
+|-t|input datatype, hifi, ont, or cram||hifi
+|-b|Import aligned BAM file|False|
+|-o|Output directory |./fnumts|
 |-r|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/chrM.fa|
 |-sr|Import reference for snpEff annotation|hg38|
-|-d|Maximun number of distance for merging intervals|10|
+|-d|Maximun number of distance for merging intervals|30|
 |-l|Minmiun number of lenght for insertion sequence|10|
-|-s|Minimun number of support reads for insertion reads|5|
+|-s|Minimun number of support reads for insertion reads|3|
 
 ## Use cases
 fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa and required indexed by using BWA.
@@ -126,39 +127,44 @@ If user has trouble to get chrM fasta file, grep_chrM.py is a script for user to
 Download reference, please look at [UCSC](https://hgdownload2.soe.ucsc.edu/downloads.html) or [NCBI](https://www.ncbi.nlm.nih.gov/).
 ### fnumts can be using with full function:
 ```
-./fnumts_main.py -bam <index.bam> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa>
+./fnumts_main.py -b <index.bam> -t <str> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa>
 ```
 
-### if userr indexed BAM file is using human_hg38 as reference, and don't want to adjust other options:
+### if user indexed BAM file is using human_hg38 as reference, and using defult options:
 ```
-./fnumts_main.py -bam <index.bam>
+./fnumts_main.py -b <index.bam>
 ```
 ## Options of fnumts
 
 ### 1. -r, --reference, input indexed reference chrM.fa.
 Option -r, --refernece, is for user can input other human chrM reference or other species chrM reference. The refernce need to be same as input indexed BAM file refernce.
 ```
-./fnumts_main.py -bam <index.bam> [-r <path/directory/index_ref_chrM.fa>]
+./fnumts_main.py -b <index.bam> [-r <path/directory/index_ref_chrM.fa>]
 ```
-### 2. -d, --distance, maximun number of distance for merging intervals.
+### 2. -t, --type, input datatype. hifi or ont.
+Using this option to change the type you put in. 
+```
+./fnumts_main.py -b <index.bam> [-t <str>]
+```
+### 3. -d, --distance, maximun number of distance for merging intervals.
 As this option, user can adjust the distance of each cluster range. 
 ```
-./fnumts_main.py -bam <index.bam> [-d <int>]
+./fnumts_main.py -b <index.bam> [-d <int>]
 ```
-### 3. -l, --lenght, minmiun number of lenght for insertion sequence. 
+### 4. -l, --lenght, minmiun number of lenght for insertion sequence. 
 For this option, user can adjust the lenght of the sequence. For example, if user set the number to 20, then fnumts will filter out the length of NUMTs less than 20bps.
 ```
-./fnumts_main.py -bam <index.bam> [-l <int>]
+./fnumts_main.py -b <index.bam> [-l <int>]
 ```
-### 4. -s, --supportread, minimun number of support reads for insertion reads.
+### 5. -s, --supportread, minimun number of support reads for insertion reads.
 -s, --supportread, is an option for user can adjust the support read number. For more accurate results, the number of support read needs to be higher.
 ```
-./fnumts_main.py -bam <index.bam> [-s <int>]
+./fnumts_main.py -b <index.bam> [-s <int>]
 ```
-### 5. -sr, --sref, Import reference for snpEff annotation.
+### 6. -sr, --sref, Import reference for snpEff annotation.
 the option -sr is for users to adjust the reference to do annotation on snpEff.
 ```
-./ fnumts_main.py -bam <index.bam> [-sr reference]
+./ fnumts_main.py -b <index.bam> [-sr reference]
 ```
 For more detail, please look at [snpEff GitHub pages](https://pcingola.github.io/SnpEff/). 
 
@@ -167,40 +173,38 @@ The output file directory includes:
 
 | File name | Description| 
 | :------------|:-------------|
-|fnumts.ann.vcf|Standard VCF file of find NUMTs and annotation. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type, annotation for each NUMT.|
 |fnumts.vcf|VCF file of finding NUMTs. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type for each NUMT.|  
-|numt.fa|Standard FASTA format file that saves all the NUMT sequences.|
-|fnumts.sam|Temporary SAM archive consistent with chrM.|
-|clusters.ins.srot.sam|Temporary SAM archive of the cluster aligned with chrM.|
-|poa_output|Temporary files during each cluster seeking consensus.|
 
 ## Output files format
 ### fnumts.vcf
 |Col|Type|Description|
-|-:|:---|:-------------|
+|-:|-:-|:-------------|
 |1|str|Target chromosome|
 |2|int|Target position|
-|3|str||
-|4|str||
-|5|str||
-|6|str||
-|7|str||
-|8|str|info|
+|3|str|ID|
+|4|str|REF|
+|5|str|ALT|
+|6|int|QUAL|
+|7|str|FILTER|
+|8|str|INFO|
 
 ```
-##fileformat=VCFv4.2  
+##fileformat=VCFv4.2
 ##FILTER=<ID=PASS,Description="All filters passed">
 ##source=Fnumts
-##INFO=<ID=CHR,Number=1,Type=String,Description="Target chromosome for NUMT sequence">
-##INFO=<ID=LEN,Number=1,Type=Integer,Description="Length of NUMTs sequence">
-##INFO=<ID=SUPREAD,Number=1,Type=Integer,Description="Number of support reads">
-##INFO=<ID=MAPQ,Number=1,Type=Integer,Description="Mapping quality">
-##INFO=<ID=NM,Number=1,Type=Integer,Description="Number of mismatches of NUMTs sequence">
-##INFO=<ID=chrMSPos,Number=1,Type=Integer,Description="Mitochondrial start coordinate of inserted sequence">
-##INFO=<ID=chrMEPos,Number=1,Type=Integer,Description="Mitochondrial end coordinate of inserted sequence">
+##fileDate=2024-07-25
+##INFO=<ID=CHR,Number=1,Type=String,Description="Chromosome where the NUMT sequence is located">
+##INFO=<ID=LEN,Number=1,Type=Integer,Description="Length of the NUMT sequence in base pairs">
+##INFO=<ID=SUPREAD,Number=1,Type=Integer,Description="Number of supporting reads for the NUMT sequence">
+##INFO=<ID=NM,Number=1,Type=Integer,Description="Number of mismatches in the NUMT sequence">
+##INFO=<ID=MQ,Number=1,Type=Integer,Description="Average mapping quality of the original reads">
+##INFO=<ID=chrMSPos,Number=1,Type=Integer,Description="Start coordinate of the NUMT sequence in the mitochondrial genome">
+##INFO=<ID=chrMEPos,Number=1,Type=Integer,Description="End coordinate of the NUMT sequence in the mitochondrial genome">
 ##INFO=<ID=TYPE,Number=1,Type=String,Description="Type of structural variant">
-##INFO=<ID=METHOD,Number=1,Type=String,Description="Type of approach used to detect NUMT">
-##CommandLine=fnumts_main.py 
+##INFO=<ID=METHOD,Number=1,Type=String,Description="Detection method used for identifying the NUMT sequence">
+##INFO=<ID=VAF,Number=1,Type=Integer,Description="Variant allele frequency at the NUMT breakpoint">
+##INFO=<ID=DEPTH,Number=1,Type=Integer,Description="Total depth of coverage at the NUMT breakpoints">
+##CommandLine=fnumts_main.py -b test.bam
 ```
 
 ### fnumts.paf
