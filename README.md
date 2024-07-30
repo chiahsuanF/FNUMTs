@@ -83,8 +83,8 @@ export PATH=$PWD/fnumts/:$PATH
 ## General usage
 | Option | Description| Default|
 | :------------|:-------------|:-------------|
-|-t|Input datatype, hifi, ont, or cram|hifi|
-|-b|Import aligned BAM file|False|
+|-t|Import datatype, hifi, ont, or cram|hifi|
+|-b|Import aligned indexed BAM file|False|
 |-o|Output directory |./fnumts|
 |-r|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/chrM.fa|
 |-sr|Import reference for snpEff annotation|hg38|
@@ -102,7 +102,7 @@ minimap2 -ax map-hifi ref.fa sample.fq > aligned.sam
 samtools sort aligned.sam -o aligned.bam
 samtools index -b aligned.bam
 ```
-after this process, user will get aligned.bam file and aligned.bam.bai file.    
+after this process, user will get <aligned.bam> file and <aligned.bam.bai> file.    
 
 For more detail, please look at [Minimap2 GitHub pages](https://github.com/lh3/minimap2) and [SAMtools GitHub pages](https://github.com/samtools/samtools).
 
