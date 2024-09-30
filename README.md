@@ -82,17 +82,19 @@ Next, add the directory to PATH:
 export PATH=$PWD/fnumts/:$PATH
 ```
 ## General usage
-| Option | Description| Default|
-| :------------|:-------------|:-------------|
-|-t|Import datatype, hifi, ont, or cram|hifi|
-|-b|Import aligned indexed BAM file|False|
-|-o|Output directory |./fnumts|
-|-r|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/chrM.fa|
-|-sr|Import reference for snpEff annotation|hg38|
-|-d|Maximun number of distance for merging intervals|30|
-|-l|Minmiun number of lenght for insertion sequence|10|
-|-s|Minimun number of support reads for insertion reads|3|
+| Option | Option | Description| Default|
+|:---------|:-------------|:-------------|:-------------|
+|-t |--type|Import datatype, hifi or ont|hifi|
+|-b |--bam|Import aligned indexed BAM file|False|
+|-c |--cram|Import aligned indexed CRAM file|False|
+|-r |--reference|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/hg38_chrM.fa|
+|-o |--outpath|Output directory |./fnumts|
+||--base_dir |Base directory for BAM file |../|
+|-d |--distance|Maximun number of distance for merging intervals|30|
+|-l |--length|Minmiun number of lenght for insertion sequence|10|
+|-s |--supportread|Minimun number of support reads for insertion reads|3|
 
+|-sr|Import reference for snpEff annotation|hg38|
 ## Use cases
 fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa and required indexed by using BWA.
 
