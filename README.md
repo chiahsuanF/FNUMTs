@@ -55,6 +55,7 @@ Dependencies for fnumts:
 * pandas(version 2.1.1)
 * BWA(version 0.7.17)
 * bsalign(version 1.2.1)
+* wtdbg2(version 2.5)
 * #snpEff(version 5.2)(with java version 1.11 or later)
   
 ## Installation
@@ -177,16 +178,18 @@ The output file directory includes:
 
 ## Output files format
 ### fnumts.vcf
-|Col|Type|Description|
-|-:|:--|:-------------|
-|1|str|Target chromosome|
-|2|int|Target position|
-|3|str|ID|
-|4|str|REF|
-|5|str|ALT|
-|6|int|QUAL|
-|7|str|FILTER|
-|8|str|INFO|
+|Col|Type|Column Name|Description|
+|-:|:--|:-------------|:-------------|
+|1|str|CHROM|Target Chromosome.|
+|2|int|POS|Target Position.|
+|3|str|ID|Event ID|
+|4|str|REF||
+|5|str|ALT||
+|6|int|QUAL|Event Score.|
+|7|str|FILTER|PASS. If score lower than 40.00, shows LowQuality.|
+|8|str|INFO|CHR,Chromosome where the NUMT sequence is located. LEN,Length of the NUMT sequence in base pairs. SUPREAD,Number of supporting reads for the NUMT sequence. NM,Number of mismatches in the NUMT sequence. MQ,Average mapping quality of the original support reads. chrMSPos,Start coordinate of the NUMT sequence in the mitochondrial genome. chrMEPos,End coordinate of the NUMT sequence in the mitochondrial genome. TYPE,Type of structural variant. METHOD,Detection method used for identifying the NUMT sequence. VAF,Variant allele frequency at the NUMT breakpoint.DEPTH,Total depth of coverage at the NUMT breakpoints|
+|9|str|FORMAT|GT:DP:AD (Genomy Type, Total Reads, Support Reads)|
+|10|str|SAMPLE_NAME|GenomeType:TotalReads:SupportReads|
 
 #### QUAL system
 Depend on the value of Number of missmatch, VAF, and Mapping Quality.
@@ -201,21 +204,25 @@ if score is lower than 40.00, FILTER will print LowQuality.
 ##fileformat=VCFv4.2
 ##FILTER=<ID=PASS,Description="All filters passed">
 ##source=Fnumts
-##fileDate=2024-07-25
+##fileDate=2024-09-30
+##contig=<ID=chr21>
 ##INFO=<ID=CHR,Number=1,Type=String,Description="Chromosome where the NUMT sequence is located">
 ##INFO=<ID=LEN,Number=1,Type=Integer,Description="Length of the NUMT sequence in base pairs">
 ##INFO=<ID=SUPREAD,Number=1,Type=Integer,Description="Number of supporting reads for the NUMT sequence">
 ##INFO=<ID=NM,Number=1,Type=Integer,Description="Number of mismatches in the NUMT sequence">
-##INFO=<ID=MQ,Number=1,Type=Integer,Description="Average mapping quality of the original reads">
+##INFO=<ID=MQ,Number=1,Type=Integer,Description="Average mapping quality of the original support reads">
 ##INFO=<ID=chrMSPos,Number=1,Type=Integer,Description="Start coordinate of the NUMT sequence in the mitochondrial genome">
 ##INFO=<ID=chrMEPos,Number=1,Type=Integer,Description="End coordinate of the NUMT sequence in the mitochondrial genome">
 ##INFO=<ID=TYPE,Number=1,Type=String,Description="Type of structural variant">
 ##INFO=<ID=METHOD,Number=1,Type=String,Description="Detection method used for identifying the NUMT sequence">
-##INFO=<ID=VAF,Number=1,Type=Integer,Description="Variant allele frequency at the NUMT breakpoint">
+##INFO=<ID=VAF,Number=1,Type=Float,Description="Variant allele frequency at the NUMT breakpoint">
 ##INFO=<ID=DEPTH,Number=1,Type=Integer,Description="Total depth of coverage at the NUMT breakpoints">
-##CommandLine=fnumts_main.py -b test.bam
-#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO
-chr11   4635114 FN1     N       ATCCCGCACAAGAGTGCTACTCTCCTCGCTCCGGGCCCA 100.00  PASS    CHR=chr11;LEN=39;SUPREAD=42;NM=0;MQ=60;chrMSPos=16423;chrMEPos=16462;TYPE=NUMT;METHOD=Fnumt;VAF=1.00;DEPTH=42
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total depth of coverage at the NUMT breakpoints">
+##FORMAT=<ID=AD,Number=1,Type=Integer,Description="Number of supporting reads for the NUMT sequence">
+##CommandLine=/data/scratch/fanc/fnumts/fnumts_main.py -t hifi -b test.bam
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  test.bam
+chr21   21708298        FN1     N       AACTGGCTTCAATCTACTTCTCCCGCCGCCGGGAAAAAAGGCGGGAGAAGCCCCGGCAGGTTTGAAGCTGCTTCTTCGAATTTGCAATTCAATATGAAAATCACCTCATTTTCTCGTC  97.20   PASS    CHR=chr21;LEN=118;SUPREAD=25;NM=0;MQ=60;chrMSPos=5714;chrMEPos=5832;TYPE=NUMT;METHOD=Fnumt;VAF=0.93;DEPTH=27    GT:DP:AD        1/1:27:25
 ```
 
 ### fnumts.paf
@@ -241,4 +248,5 @@ chr11   4635114 FN1     N       ATCCCGCACAAGAGTGCTACTCTCCTCGCTCCGGGCCCA 100.00  
 4. [pandas](https://devdocs.io/pandas~0.25/)
 5. [BWA](https://bio-bwa.sourceforge.net/bwa.shtml)
 6. [bsalign](https://github.com/ruanjue/bsalign)
-7. [snpEff](https://pcingola.github.io/SnpEff/)
+7. [wtdbg2](https://github.com/ruanjue/wtdbg2)
+8. [snpEff](https://pcingola.github.io/SnpEff/)
