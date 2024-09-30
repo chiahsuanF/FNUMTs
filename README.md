@@ -220,7 +220,7 @@ if score is lower than 40.00, FILTER will print LowQuality.
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total depth of coverage at the NUMT breakpoints">
 ##FORMAT=<ID=AD,Number=1,Type=Integer,Description="Number of supporting reads for the NUMT sequence">
-##CommandLine=/data/scratch/fanc/fnumts/fnumts_main.py -t hifi -b test.bam
+##CommandLine=fnumts_main.py -b test.bam
 #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  test.bam
 chr21   21708298        FN1     N       AACTGGCTTCAATCTACTTCTCCCGCCGCCGGGAAAAAAGGCGGGAGAAGCCCCGGCAGGTTTGAAGCTGCTTCTTCGAATTTGCAATTCAATATGAAAATCACCTCATTTTCTCGTC  97.20   PASS    CHR=chr21;LEN=118;SUPREAD=25;NM=0;MQ=60;chrMSPos=5714;chrMEPos=5832;TYPE=NUMT;METHOD=Fnumt;VAF=0.93;DEPTH=27    GT:DP:AD        1/1:27:25
 ```
