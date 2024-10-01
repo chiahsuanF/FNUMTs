@@ -44,7 +44,7 @@ cd fnumts/
 ## Description
 fnumts is a tool for finding insertion mitochondria DNA in nuclear genome. fnumts can detect NUMT length from 1 bp up to whole mitochondira DNA.      
 
-The input file should be a long-read indexed BAM(PacBio Hifi and Oxford Nanopore) file. The input reference chrM needs to be same as aligned bam file reference, and needs to be indexed by BWA. The output is a standard VCF file which passed filter. This program was test on a x86_64 Linux system with 40GB physical memory.
+The input file should be a long-read indexed BAM(PacBio Hifi and Oxford Nanopore) file. The input reference chrM needs to be same as aligned bam file reference, and needs to be duplicated and indexed by BWA. The output is a standard VCF file which passed filter. This program was test on a x86_64 Linux system with 40GB physical memory.
 
 ## Depencency
 Dependencies for fnumts:
@@ -96,7 +96,7 @@ export PATH=$PWD/fnumts/:$PATH
 
 |-sr|Import reference for snpEff annotation|hg38|
 ## Use cases
-fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa and required indexed by using BWA.
+fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa, duplicated sequence and required indexed by using BWA.
 
 ### Mapping long-read raw data with minimap2 and samtools:
 Download the reference FASTA file and sample's FASTQ file, then:
@@ -119,18 +119,26 @@ and user will see ref_chrM.fa file with five new files, ref_chrM.fa.amb, ref_chr
 For more detail, please look at [BWA GitHub pages](https://github.com/lh3/bwa).   
 
 ### Get chrM FASTA file
-If user has trouble to get chrM fasta file, grep_chrM.py is a script for user to get only chrM sequence from reference FASTA file and save into FASTA format.  
+If user has trouble to get chrM fasta file, grep_chrM.py is a script for user to get only chrM sequence from reference FASTA file and save into FASTA standard format. The chrM.fa has duplicated sequences, so user can use this to do later analysis.
 ```
 # Usage
-./grep_chrM.py -i <input_fasta> [-o output.fa] [-c chrM_name_from_reference_fa]
+./grep_chrM.py -i <input_fasta> [-o output.fa] [-c chrM_name_from_reference_fasta]
 
 # Example
 ./grep_chrM.py -i GRCh38.p13.genome.fa
 ```
+| Option | Option | Description| Default|
+|:---------|:-------------|:-------------|:-------------|
+|-i |--input_fasta|Input FASTA format file|False|
+|-o |--output_fasta|Output FASTA format file|./chrM.fa|
+|-c |--chromosome|Chromosome names from reference FASTA file to extract|chrM|
+
+
 Download reference, please look at [UCSC](https://hgdownload2.soe.ucsc.edu/downloads.html) or [NCBI](https://www.ncbi.nlm.nih.gov/).
+
 ### fnumts can be using with full function:
 ```
-./fnumts_main.py -b <index.bam> -t <str> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa>
+./fnumts_main.py -b <index.bam> -t <str> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa> -o <str>
 ```
 
 ### if user indexed BAM file is using human_hg38 as reference, and using defult options:
@@ -139,37 +147,40 @@ Download reference, please look at [UCSC](https://hgdownload2.soe.ucsc.edu/downl
 ```
 ## Options of fnumts
 
-### 1. -r, --reference, input indexed reference chrM.fa.
+
+### 1. -b, --bam, or -c, --cram,  input indexed bam file or cram file.
+Option -b, --bam, or -c, --cram, is required. The index file, .bai or .crai need to be same location as .bam and .cram file. 
+```
+./fnumts_main.py -b <index.bam> [-r <path/directory/index_ref_chrM.fa>]
+```
+```
+./fnumts_main.py -c <index.cram> [-r <path/directory/index_ref_chrM.fa>]
+```
+### 2. -r, --reference, input indexed reference chrM.fa.
 Option -r, --refernece, is for user can input other human chrM reference or other species chrM reference. The refernce need to be same as input indexed BAM file refernce.
 ```
 ./fnumts_main.py -b <index.bam> [-r <path/directory/index_ref_chrM.fa>]
 ```
-### 2. -t, --type, input datatype. hifi or ont.
-Using this option to change the type you put in. 
+### 3. -t, --type, input datatype. hifi or ont.
+Using this option to change the type you put in. PacBio HiFi or Oxford Nanopore(ONT). Default hifi.
 ```
 ./fnumts_main.py -b <index.bam> [-t <str>]
 ```
-### 3. -d, --distance, maximun number of distance for merging intervals.
-As this option, user can adjust the distance of each cluster range. 
+### 4. -d, --distance, maximun number of distance for merging intervals.
+As this option, user can adjust the distance of each cluster range. Default 30.
 ```
 ./fnumts_main.py -b <index.bam> [-d <int>]
 ```
-### 4. -l, --lenght, minmiun number of lenght for insertion sequence. 
-For this option, user can adjust the lenght of the sequence. For example, if user set the number to 20, then fnumts will filter out the length of NUMTs less than 20bps.
+### 5. -l, --lenght, minmiun number of lenght for insertion sequence. 
+For this option, user can adjust the lenght of the sequence. For example, if user set the number to 20, then fnumts will filter out the length of NUMTs less than 20bps. Default 10.
 ```
 ./fnumts_main.py -b <index.bam> [-l <int>]
 ```
-### 5. -s, --supportread, minimun number of support reads for insertion reads.
--s, --supportread, is an option for user can adjust the support read number. For more accurate results, the number of support read needs to be higher.
+### 6. -s, --supportread, minimun number of support reads for insertion reads.
+-s, --supportread, is an option for user can adjust the support read number. For more accurate results, the number of support read needs to be higher. Default 3.
 ```
 ./fnumts_main.py -b <index.bam> [-s <int>]
 ```
-### 6. -sr, --sref, Import reference for snpEff annotation.
-the option -sr is for users to adjust the reference to do annotation on snpEff.
-```
-./ fnumts_main.py -b <index.bam> [-sr reference]
-```
-For more detail, please look at [snpEff GitHub pages](https://pcingola.github.io/SnpEff/). 
 
 ## Output files
 The output file directory includes:
