@@ -197,7 +197,7 @@ The output file directory includes:
 |2|int|POS|Target Position.|
 |3|str|ID|Event ID|
 |4|str|REF||
-|5|str|ALT||
+|5|str|ALT|The alternative allele is the allele found in studying.|
 |6|int|QUAL|Event Score.|
 |7|str|FILTER|PASS. If score lower than 40.00, shows LowQuality.|
 |8|str|INFO|CHR,Chromosome where the NUMT sequence is located. LEN,Length of the NUMT sequence in base pairs. SUPREAD,Number of supporting reads for the NUMT sequence. NM,Number of mismatches in the NUMT sequence. MQ,Average mapping quality of the original support reads. chrMSPos,Start coordinate of the NUMT sequence in the mitochondrial genome. chrMEPos,End coordinate of the NUMT sequence in the mitochondrial genome. TYPE,Type of structural variant. METHOD,Detection method used for identifying the NUMT sequence. VAF,Variant allele frequency at the NUMT breakpoint.DEPTH,Total depth of coverage at the NUMT breakpoints|
