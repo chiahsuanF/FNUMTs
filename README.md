@@ -138,7 +138,7 @@ Download reference, please look at [UCSC](https://hgdownload2.soe.ucsc.edu/downl
 
 ### fnumts can be using with full function:
 ```
-./fnumts_main.py -b <index.bam> -t <str> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa> -o <str>
+./fnumts_main.py -b <index.bam> [-t <str>] [-d <int>] [-l <int>] [-s <int>] [-r <index_ref_chrM.fa>] [-o <str>]
 ```
 
 ### if user indexed BAM file is using human_hg38 as reference, and using defult options:
