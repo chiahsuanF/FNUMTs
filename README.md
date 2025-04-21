@@ -56,7 +56,7 @@ Dependencies for fnumts:
 * BWA(version 0.7.17)
 * bsalign(version 1.2.1)
 * wtdbg2(version 2.5)
-* #snpEff(version 5.2)(with java version 1.11 or later)
+
   
 ## Installation
 
@@ -262,4 +262,3 @@ chr21   21708298        FN1     N       AACTGGCTTCAATCTACTTCTCCCGCCGCCGGGAAAAAAG
 5. [BWA](https://bio-bwa.sourceforge.net/bwa.shtml)
 6. [bsalign](https://github.com/ruanjue/bsalign)
 7. [wtdbg2](https://github.com/ruanjue/wtdbg2)
-8. [snpEff](https://pcingola.github.io/SnpEff/)
