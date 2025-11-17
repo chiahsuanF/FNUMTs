@@ -1,5 +1,5 @@
 # fnumts
-test file
+
 Finding NUMTs from long-read sequencing data.
 
 Author: Chia-Hsuan Fan
