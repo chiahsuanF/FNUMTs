@@ -90,7 +90,7 @@ export PATH=$PWD/fnumts/:$PATH
 |-ts |--threads|[INT] Number of CPU threads to use|4|
 |-b |--bam|Import aligned indexed BAM file|False|
 |-c |--cram|Import aligned indexed CRAM file|False|
-|-mr |--reference|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/hg38_chrM.fa|
+|-mr |--reference|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|/scratch/fanc/fnumts/ref/d_chrM.fa|
 |-dr|--deletion_reference|[STR] Import reference chromosome genome|/scratch/fanc/fnumts/ref/GRCh38.p13.genome.fa|
 |-o |--outpath|Output directory |./fnumts|
 |-ov |--output_vcfname|[STR] The name of the output VCF file |fnumts|
