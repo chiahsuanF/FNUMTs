@@ -85,13 +85,19 @@ export PATH=$PWD/fnumts/:$PATH
 ## General usage
 | Option | Option | Description| Default|
 |:---------|:-------------|:-------------|:-------------|
-|-t |--type|Import datatype, hifi or ont|hifi|
+|-h |--help|Show this help message and exit| |
+|-t |--type|[STR] Input datatype, HIFI or ONT|hifi|
+|-ts |--threads|[INT] Number of CPU threads to use|4|
 |-b |--bam|Import aligned indexed BAM file|False|
 |-c |--cram|Import aligned indexed CRAM file|False|
-|-r |--reference|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/hg38_chrM.fa|
+|-mr |--reference|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|userpath/fnumts/ref/hg38_chrM.fa|
+|-dr|--deletion_reference|[STR] Import reference chromosome genome|/scratch/fanc/fnumts/ref/GRCh38.p13.genome.fa|
 |-o |--outpath|Output directory |./fnumts|
-||--base_dir |Base directory for BAM file |../|
+|-ov |--output_vcfname|[STR] The name of the output VCF file |fnumts|
+|-bd|--base_dir |Base directory for BAM file |../|
+|-cr|--cram_reference|[STR] Import cram reference fasta file. Cram file required.|/scratch/fanc/fnumts/ref/1KG_ONT_VIENNA_hg38.fa|
 |-d |--distance|Maximun number of distance for merging intervals|30|
+|-dl|--deletion_length|[INT] Maximum number of deletion length. it should be less than chrM total length|16568|
 |-l |--length|Minmiun number of lenght for insertion sequence|10|
 |-s |--supportread|Minimun number of support reads for insertion reads|3|
 
