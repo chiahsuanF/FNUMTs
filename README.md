@@ -2,11 +2,9 @@
 
 Finding NUMTs from long-read sequencing data.
 
-Author: Chia-Hsuan Fan
+Author: Chia Hsuan Fan
 
 Email: fanc@uab.edu
-
-Draft date:
 
 ## Quick Start
 ```sh
@@ -22,24 +20,24 @@ cd fnumts/
 ./fnumts_main.py -b <index.bam>
 
 # Example usage:
-./fnumts_main.py -b index_human_hg38.bam
+./fnumts_main.py -b index_aligned_human_hg38.bam
 ```
 
 ```sh
 # Finding NUMTs with indexed bam. The reference using other species' chrM indexed by BWA.
-./fnumts_main.py -b <index.bam> -r <index_ref_chrM.fa>
+./fnumts_main.py -b <index.bam> -mr <index_ref_chrM.fa>
 
 # Example usage:
-./fnumts_main.py -b index.bam -r path/directory/index_ref_chrM.fa
+./fnumts_main.py -b index_aligned_human_hg38.bam -mr path/directory/index_ref_chrM.fa
 ```
 
 ```sh
 # Finding NUMTs with indexed bam. The reference using other species' chrM.fa indexed by BWA.
 # Adjust distance, length, and support reads.
-./fnumts_main.py -b <index.bam> -d <int> -l <int> -s <int> -r <index_ref_chrM.fa>
+./fnumts_main.py -b <index.bam> -d <int> -l <int> -s <int> -mr <index_ref_chrM.fa>
 
 # Example usage:
-./fnumts_main.py -b index.bam -d 20 -l 20 -s 10 -r path/directory/index_ref_chrM.fa
+./fnumts_main.py -b index.bam -d 20 -l 20 -s 10 -mr path/directory/index_ref_chrM.fa
 ```
 
 ## Description
@@ -83,25 +81,24 @@ Next, add the directory to PATH:
 export PATH=$PWD/fnumts/:$PATH
 ```
 ## General usage
-| Option | Option | Description| Default|
+| Option |  |Description| Default|
 |:---------|:-------------|:-------------|:-------------|
 |-h |--help|Show this help message and exit| |
-|-t |--type|[STR] Input datatype, HIFI or ONT|hifi|
+|-t |--type|[STR] Input datatype, hifi or ont|hifi|
 |-ts |--threads|[INT] Number of CPU threads to use|4|
-|-b |--bam|Import aligned indexed BAM file|False|
-|-c |--cram|Import aligned indexed CRAM file|False|
+|-b |--bam|[STR] Import aligned indexed BAM file|False|
+|-c |--cram|[STR] Import aligned indexed CRAM file|False|
 |-mr |--reference|Import reference chromosome mitochondria. The reference needs to be indexed by BWA|/scratch/fanc/fnumts/ref/d_chrM.fa|
 |-dr|--deletion_reference|[STR] Import reference chromosome genome|/scratch/fanc/fnumts/ref/GRCh38.p13.genome.fa|
-|-o |--outpath|Output directory |./fnumts|
+|-o |--outpath|Name of output directory |./fnumts|
 |-ov |--output_vcfname|[STR] The name of the output VCF file |fnumts|
-|-bd|--base_dir |Base directory for BAM file |../|
+|-bd|--base_dir |[STR] Base directory for BAM file |../|
 |-cr|--cram_reference|[STR] Import cram reference fasta file. Cram file required.|/scratch/fanc/fnumts/ref/1KG_ONT_VIENNA_hg38.fa|
-|-d |--distance|Maximun number of distance for merging intervals|30|
-|-dl|--deletion_length|[INT] Maximum number of deletion length. it should be less than chrM total length|16568|
-|-l |--length|Minmiun number of lenght for insertion sequence|10|
-|-s |--supportread|Minimun number of support reads for insertion reads|3|
+|-d |--distance|[INT] Maximun number of distance for merging intervals|30|
+|-ml |--max_length|[INT] Maximum number of deletion length. it should be less than chrM total length.|16568|
+|-l |--length|[INT] Minmiun number of lenght for insertion sequence|10|
+|-s |--supportread|[INT] Minimun number of support reads for insertion reads|3|
 
-|-sr|Import reference for snpEff annotation|hg38|
 ## Use cases
 fnumts required input as an aligned BAM file with header. Mapping raw data suggests using minimap2 and samtools. Input reference only needs reference chrM.fa, duplicated sequence and required indexed by using BWA.
 
@@ -145,7 +142,9 @@ Download reference, please look at [UCSC](https://hgdownload2.soe.ucsc.edu/downl
 
 ### fnumts can be using with full function:
 ```
-./fnumts_main.py -b <index.bam> [-t <str>] [-d <int>] [-l <int>] [-s <int>] [-r <index_ref_chrM.fa>] [-o <str>]
+./fnumts_main.py -b <index.bam> \
+  [-t <str>] [-ts <int>] [-d <int>] [-l <int>] [-ml <int>] [-s <int>] \
+  [-bd <str>] [-o <str>] [-ov <str>] [-mr <index_ref_chrM.fa>] [-dr <index_ref_hg38.fa>]
 ```
 
 ### if user indexed BAM file is using human_hg38 as reference, and using defult options:
@@ -194,7 +193,7 @@ The output file directory includes:
 
 | File name | Description| 
 | :------------|:-------------|
-|fnumts.vcf|VCF file of finding NUMTs. The chromosome, length, supportread, mapping quality, number of mismatch, start position, end position, type for each NUMT, mapping quality, and depth.|  
+|fnumts.vcf|VCF file of finding NUMTs. The chromosome, length, supportread, number of mismatch, mt start position, mt end position, type for each NUMT, average mapping quality, and depth.|  
 
 ## Output files format
 ### fnumts.vcf
@@ -207,7 +206,7 @@ The output file directory includes:
 |5|str|ALT|The alternative allele is the allele found in studying.|
 |6|int|QUAL|Event Score.|
 |7|str|FILTER|PASS. If score lower than 40.00, shows LowQuality.|
-|8|str|INFO|CHR,Chromosome where the NUMT sequence is located. LEN,Length of the NUMT sequence in base pairs. SUPREAD,Number of supporting reads for the NUMT sequence. NM,Number of mismatches in the NUMT sequence. MQ,Average mapping quality of the original support reads. chrMSPos,Start coordinate of the NUMT sequence in the mitochondrial genome. chrMEPos,End coordinate of the NUMT sequence in the mitochondrial genome. TYPE,Type of structural variant. METHOD,Detection method used for identifying the NUMT sequence. VAF,Variant allele frequency at the NUMT breakpoint.DEPTH,Total depth of coverage at the NUMT breakpoints|
+|8|str|INFO|CHR, Chromosome where the NUMT sequence is located. LEN, Length of the NUMT sequence in base pairs. SUPREAD, Number of supporting reads for the NUMT sequence. NM, Number of mismatches in the NUMT sequence. MQ, Average mapping quality of the original support reads. chrMSPos, Start coordinate of the NUMT sequence in the mitochondrial genome. chrMEPos, End coordinate of the NUMT sequence in the mitochondrial genome. TYPE, Type of structural variant. METHOD, Detection method used for identifying the NUMT sequence. VAF, Variant allele frequency at the NUMT breakpoint.DEPTH, Total depth of coverage at the NUMT breakpoints|
 |9|str|FORMAT|GT:DP:AD (Genomy Type, Total Reads, Support Reads)|
 |10|str|SAMPLE_NAME|GenomeType:TotalReads:SupportReads|
 
@@ -244,22 +243,6 @@ if score is lower than 40.00, FILTER will print LowQuality.
 #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  test.bam
 chr21   21708298        FN1     N       AACTGGCTTCAATCTACTTCTCCCGCCGCCGGGAAAAAAGGCGGGAGAAGCCCCGGCAGGTTTGAAGCTGCTTCTTCGAATTTGCAATTCAATATGAAAATCACCTCATTTTCTCGTC  97.20   PASS    CHR=chr21;LEN=118;SUPREAD=25;NM=0;MQ=60;chrMSPos=5714;chrMEPos=5832;TYPE=NUMT;METHOD=Fnumt;VAF=0.93;DEPTH=27    GT:DP:AD        1/1:27:25
 ```
-
-### fnumts.paf
-|Col|Type|Description|
-|--:|:---|:-------------|
-|1|str|Query name|
-|2|int|Query length|
-|3|int|Query start|
-|4|int|Query end|
-|5|str|Relative strand: "+" or "-"|
-|6|str|Target name|
-|7|int|Target length|
-|8|int|Target start|
-|9|int|Target end|
-|10|int|Number of mismatch|
-|11|int|Alignment block length|
-
 
 ## Additional information
 1. [pysam](https://pysam.readthedocs.io/en/latest/api.html)
