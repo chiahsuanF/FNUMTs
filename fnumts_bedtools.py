@@ -21,9 +21,6 @@ def sort_and_filter_cigar_data(args, writepath):
     newsort = newsort.dropna(how='any',axis=0)
     newsort[['chr', 'start_pos', 'end_pos', 'INS', 'MQ', 'length', 'seq']].to_csv(writepath+'53_cut_3.srt.txt', sep='\t', header=False, index=False)
 
-
-    
-#54
 def merge_intervals(bed_list, max_distance):
     if not bed_list:
         return []
@@ -44,12 +41,10 @@ def merge_intervals(bed_list, max_distance):
     merged.append((current_interval[0], current_interval[1], current_interval[2], count))
     return merged
 
-#62
 def read_intervals(filename):
     intervals = pd.read_csv(filename, sep='\t', header=None).values
     return sorted(intervals, key=lambda x: (x[0], x[1], x[2]))
 
-#64
 def bed_intersect(a_intervals, b_intervals):
     intersecting_intervals = []
     i, j = 0, 0
