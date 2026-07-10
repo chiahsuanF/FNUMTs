@@ -5,7 +5,6 @@ import pandas as pd
 from multiprocessing import Pool, cpu_count
  
 
-#51
 def sort_and_filter_cigar_data(args, writepath):
     chr_list2 = [
         "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
