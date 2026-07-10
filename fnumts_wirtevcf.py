@@ -1,41 +1,93 @@
 #!/usr/bin/env python3
 
-import pysam
+import pysam, datetime, sys, os, argparse
 
-def process_alignment_file(input_path, output_path):
-    samfile = pysam.AlignmentFile(input_path, "r")
-    iter_records = samfile.fetch()
+def extract_chromosomes(file_data):
+    # Assuming chromosomes are in the #CHROM column
+    chromosomes = set()
+    for line in file_data.splitlines():
+        if not line.startswith("#"):
+            fields = line.split('\t')
+            chromosomes.add(fields[0])  # Assuming the chromosome is in the first column
+    return list(chromosomes)
 
-    with open(output_path, 'w') as output_file:
-        process_records(iter_records, output_file)
 
-def process_records(records, output_file):
-    for record in records:
-        process_record(record, output_file)
+# Function to create VCF header with FORMAT field and sample name
+def vcf_header(chromosomes, bampath):
+    filedate = str(datetime.datetime.now()).split(' ')[0]
+    vcfheader = pysam.VariantHeader()
+    
+    # Extract the sample name by removing any leading '../'
+    sample_name = os.path.basename(bampath)
 
-def process_record(record, output_file):
-    reference_start = int(record.reference_start)
-    nm_tag = get_nm_tag(record)
+    bamfile = pysam.AlignmentFile(bampath, 'r')
+    vcfheader.add_sample(sample_name)
+    
+    # Add general headers
+    vcfheader.add_meta('source', 'Fnumts')
+    vcfheader.add_meta('fileDate', filedate)
 
-    if nm_tag is not None:
-        output_file.write(f"{record.query_name}\t{record.query_sequence}\t{record.mapping_quality}\t{reference_start + 1}\t{nm_tag}\n")
+    # Add contig lines for each chromosome
+    for chrom in chromosomes:
+        vcfheader.add_line(f'##contig=<ID={chrom}>')
 
-def get_nm_tag(record):
-    for tag, value in record.get_tags():
-        if tag == "NM":
-            return value
-    return None
+    # Add INFO fields
+    vcfheader.add_meta('INFO', items=[('ID', 'CHR'), ('Number', 1), ('Type', 'String'), ('Description', 'Chromosome where the NUMT sequence is located')])
+    vcfheader.add_meta('INFO', items=[('ID', 'LEN'), ('Number', 1), ('Type', 'Integer'), ('Description', 'Length of the NUMT sequence in base pairs')])
+    vcfheader.add_meta('INFO', items=[('ID', 'SUPREAD'), ('Number', 1), ('Type', 'Integer'), ('Description', 'Number of supporting reads for the NUMT sequence')])
+    vcfheader.add_meta('INFO', items=[('ID', 'NM'), ('Number', 1), ('Type', 'Integer'), ('Description', 'Number of mismatches in the NUMT sequence')])
+    vcfheader.add_meta('INFO', items=[('ID', 'MQ'), ('Number', 1), ('Type', 'Integer'), ('Description', 'Average mapping quality of the original support reads')])
+    vcfheader.add_meta('INFO', items=[('ID', 'chrMSPos'), ('Number', 1), ('Type', 'Integer'), ('Description', 'Start coordinate of the NUMT sequence in the mitochondrial genome')])
+    vcfheader.add_meta('INFO', items=[('ID', 'chrMEPos'), ('Number', 1), ('Type', 'Integer'), ('Description', 'End coordinate of the NUMT sequence in the mitochondrial genome')])
+    vcfheader.add_meta('INFO', items=[('ID', 'TYPE'), ('Number', 1), ('Type', 'String'), ('Description', 'Structural variant type: INS indicates an insertion relative to the reference; DEL indicates a deletion relative to the reference')])
+    vcfheader.add_meta('INFO', items=[('ID', 'METHOD'), ('Number', 1), ('Type', 'String'), ('Description', 'Detection method used for identifying the NUMT sequence')])
+    vcfheader.add_meta('INFO', items=[('ID', 'VAF'), ('Number', 1), ('Type', 'Float'), ('Description', 'Variant allele frequency at the NUMT breakpoint')])
+    vcfheader.add_meta('INFO', items=[('ID', 'DEPTH'), ('Number', 1), ('Type', 'Integer'), ('Description', 'Total depth of coverage at the NUMT breakpoints')])
+    vcfheader.add_meta('FORMAT', items=[('ID',"GT"), ('Number',1), ('Type','String'),('Description','Genotype')])
+    vcfheader.add_meta('FORMAT', items=[('ID',"DP"), ('Number',1), ('Type','Integer'),('Description','Total depth of coverage at the NUMT breakpoints')])
+    vcfheader.add_meta('FORMAT', items=[('ID',"AD"), ('Number',1), ('Type','Integer'),('Description','Number of supporting reads for the NUMT sequence')])
+    vcfheader.add_meta('FILTER', items=[('ID',"LowQuality"), ('Number',1), ('Type','String'),('Description','Low quality variant')])    
+    # Add command line info
+    vcfheader.add_meta('CommandLine', ' '.join(sys.argv))
 
-def generate_vcf_row(row):
-    chrMEPos = row["M_start"] + row["lenght"]
-    vcf_data = [
-        row["chr"],
-        row["start_pos"],
-        ".",
-        "N",
-        row["seq"],
-        ".",
-        "PASS",
-        f"CHR={row['chr']};LEN={row['lenght']};SUPREAD={row['depth']};MAPQ={row['MQ']};NM={row['NM']};chrMSPos={row['M_start']};chrMEPos={chrMEPos};TYPE=INS;METHOD=Fnumt"
-    ]
-    return "\t".join(map(str, vcf_data))
+    return vcfheader
+
+def add_format_and_sample_data(file_data):
+    new_lines = []
+    
+    # Split the file into lines
+    for line in file_data.splitlines():
+        # Skip the header line
+        if line.startswith("#CHROM"):
+            new_lines.append(line + '\tFORMAT\tSAMPLE')
+            continue
+        
+        # Split the VCF data fields
+        fields = line.split('\t')
+        
+        # Extract relevant INFO fields
+        info_field = fields[7]  # INFO field is the 8th column
+        info_dict = {kv.split('=')[0]: kv.split('=')[1] for kv in info_field.split(';')}
+        
+        vaf = float(info_dict.get('VAF', 0))  # Extract VAF
+        depth = int(float(info_dict.get('DEPTH', '0')))
+        supread = info_dict.get('SUPREAD', '0')  # Extract SUPREAD
+
+        # Calculate the GT value based on VAF
+        if vaf < 0.3:
+            gt = '0/0'
+        elif 0.3 <= vaf <= 0.69:
+            gt = '0/1'
+        else:
+            gt = '1/1'
+        
+        # Format: GT:DP:AD
+        format_value = 'GT:DP:AD'
+        sample_value = f'{gt}:{depth}:{supread}'
+        
+        # Append the new line with FORMAT and SAMPLE
+        new_line = line + f'\t{format_value}\t{sample_value}'
+        new_lines.append(new_line)
+    
+    # Join the new lines back into the file data
+    return '\n'.join(new_lines)
