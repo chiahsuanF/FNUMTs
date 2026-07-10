@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import os
-import argparse
-import sys
+import os, argparse, sys
 
 
 def check_input_arguments(args):
