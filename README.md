@@ -2,9 +2,9 @@
 
 Finding NUMTs from long-read sequencing data.
 
-Author: Chia Hsuan Fan
+Author: Chia Hsuan(Josh) Fan
 
-Email: fanc@uab.edu
+Email: rge4br@virginia.edu
 
 ## Quick Start
 ```sh
