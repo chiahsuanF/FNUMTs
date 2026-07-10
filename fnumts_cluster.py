@@ -5,10 +5,6 @@ import pysam, os, multiprocessing
 
 TARGET_CHROMOSOMES = [f"chr{i}" for i in range(1, 23)] + ["chrX", "chrY"]
 
-# -----------------------------
-# Helper functions
-# -----------------------------
-
 def write_ins(ct, line, s, r, length):
     seq = line.query_sequence[r:r+length]
     ct.write(f"{line.reference_name}\t{s+1}\t{s+1+length}\t{line.mapping_quality}\tINS\t{length}\t{seq}\n")
@@ -28,9 +24,6 @@ def calculate_end(line):
     return pos
 
 def extract_soft_clips(line):
-    """
-    Return list of (query_start, length) for soft clips.
-    """
     r = 0
     scs = []
 
@@ -92,10 +85,6 @@ def process_line(ct, cd, line, args):
                 write_del(cd, line, s, length)
             s += length
 
-# -----------------------------
-# Worker function for multiprocessing
-# -----------------------------
-
 def worker(task):
     file_path, contig, out_prefix, args, is_cram, ref = task
     cigar_file = f"{out_prefix}_{contig}.cigar.txt"
@@ -115,10 +104,6 @@ def worker(task):
     aln.close()
     return cigar_file, del_file
 
-# -----------------------------
-# Main function to run parallel processing
-# -----------------------------
-
 def run_parallel(file_path, outpath, args, is_cram=False, ref=None):
     out_prefix = os.path.join(outpath, "51")
     tasks = []
@@ -132,11 +117,9 @@ def run_parallel(file_path, outpath, args, is_cram=False, ref=None):
         tasks.append((file_path, contig, out_prefix, args, is_cram, ref))
     aln.close()
 
-    # Run one CPU per chromosome (or limit to threads)
     with multiprocessing.Pool(processes=min(args.threads, len(tasks))) as pool:
         results = pool.map(worker, tasks)
 
-    # Merge temporary files
     cigar_out = os.path.join(outpath, "51_cigar.txt")
     del_out = os.path.join(outpath, "51_cigar_del.txt")
     with open(cigar_out, "w") as ct, open(del_out, "w") as cd:
