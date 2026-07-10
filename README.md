@@ -41,7 +41,7 @@ cd fnumts/
 ```
 
 ## Description
-fnumts is a tool for finding insertion mitochondria DNA in nuclear genome. fnumts can detect NUMT length from 1 bp up to whole mitochondira DNA.      
+fnumts is a tool for finding insertion and deletion mitochondria DNA in nuclear genome. fnumts can detect NUMT length from 1 bp up to whole mitochondira DNA.      
 
 The input file should be a long-read indexed BAM(PacBio Hifi and Oxford Nanopore) file. The input reference chrM needs to be same as aligned bam file reference, and needs to be duplicated and indexed by BWA. The output is a standard VCF file which passed filter. This program was test on a x86_64 Linux system with 40GB physical memory.
 
