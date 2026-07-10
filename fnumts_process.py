@@ -7,8 +7,6 @@ from functools import partial
 from tqdm import tqdm
 
 
-########################
-
 def extract_and_sort_columns(df):
     selected_columns = ["chr", "sp1", "depth", "INS",  "avg_MQ", "len", "seq"]
     sorted_df = df[selected_columns].sort_values(by=["chr", "sp1", "len"])
@@ -40,8 +38,6 @@ def read_data(input_file):
     return pre_data
 
 def preprocess_and_write_wt(pbsw_file, read2_file):
-
-
     if os.stat(pbsw_file).st_size == 0:
         print(f"{pbsw_file} is empty. Skipping preprocessing.")
         return []
@@ -93,7 +89,6 @@ def preprocess_and_write_wt(pbsw_file, read2_file):
         else:
             read2_index += 1
 
-    # Write only files with >= 2 sequences
     output_files = []
     for file_name, records in seq_dict.items():
         if len(records) >= 2:
@@ -102,8 +97,6 @@ def preprocess_and_write_wt(pbsw_file, read2_file):
             output_files.append(file_name)
 
     return output_files
-
-
 
 def preprocess_and_write_bs(pbsw_file, read2_file):
     if os.stat(pbsw_file).st_size == 0:
@@ -159,7 +152,6 @@ def preprocess_and_write_bs(pbsw_file, read2_file):
     return output_files
 
 def run_cmd(cmd):
-    """Run a shell command safely."""
     subprocess.run(cmd, shell=True, check=True)
     
 def run_wtdbg2(file, threads):
@@ -167,26 +159,22 @@ def run_wtdbg2(file, threads):
     lay = f"{prefix}.wtdbg.ctg.lay.gz"
 
     try:
-        # 1. Run wtdbg2 (can use threads)
         subprocess.run(
             f"wtdbg2 -t {threads} -q -i {file} -fo {prefix}.wtdbg",
             shell=True,
             check=True
         )
 
-        # 2. Validate layout file
         if not os.path.exists(lay) or os.path.getsize(lay) < 1000:
             print(f"[SKIP] Invalid layout: {lay}")
             return prefix, "NO_LAYOUT"
 
-        # 3. Run consensus SINGLE-THREADED (IMPORTANT)
         subprocess.run(
             f"wtpoa-cns -t 1 -q -i {lay} -fo {prefix}.align.fa",
             shell=True,
             check=True
         )
 
-        # 4. Rename contig header
         subprocess.run(
             f"sed -E 's/ctg[0-9]+ len=[0-9]+/{prefix[:-3]}/' "
             f"{prefix}.align.fa > {prefix}.rename.fa",
