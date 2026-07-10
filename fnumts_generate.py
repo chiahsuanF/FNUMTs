@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
 
-#72
+
 def save_sorted_data(sorted_df, output_file):
     sorted_df.to_csv(output_file, sep='\t', header=None, index=False)
 
-#77
 def add_header_column(data):
     data['header'] = data.apply(generate_header, axis=1)
     return data[['header', 'seq']]
@@ -13,18 +12,10 @@ def add_header_column(data):
 def generate_header(row):
     return f'>{row["chr"]}_{row["start_pos"]}_{row["depths"]}_{row["INS"]}_{row["MQ"]}_{row["lenght"]}'
 
-#78
 def save_to_fna(data, output_file):
     data.to_csv(output_file, sep='\n', header=False, index=False)
-    
-    
-############
 
 def calculate_score(mismatches, vaf, mq, seq_type, max_mismatches=50, max_mq=60, weights=(0.3, 0.4, 0.3)):
-    """
-    def normalize_support_read(support_read, depth):
-        return min(support_read / depth, 1)
-    """
     def normalize_mismatches(mismatches, max_mismatches):
         return 1 - min(mismatches / max_mismatches, 1)
 
@@ -33,27 +24,18 @@ def calculate_score(mismatches, vaf, mq, seq_type, max_mismatches=50, max_mq=60,
     
     def normalize_mq(mq, max_mq):
         return min(mq / max_mq, 1)
-    
-    # Set total depth based on sequencing type
-    # total_depth = 40 if seq_type == 'hifi' else 60
 
-    # Normalize each metric
-    #normalized_support_read = normalize_support_read(support_read, depth)
     normalized_mismatches = normalize_mismatches(mismatches, max_mismatches)
     normalized_vaf = normalize_vaf(vaf)  # Ensure VAF is capped at 1
     normalized_mq = normalize_mq(mq, max_mq)
-
-    # Calculate the final score
+    
     score = (
         (weights[0] * normalized_mismatches +
         weights[1] * normalized_vaf +
          weights[2] * normalized_mq) * 100
     )
     return score
-############
-
-
-
+    
 def process_vcf(input_file, output_file, seq_type):
     with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
         for line in infile:
@@ -71,30 +53,24 @@ def process_vcf(input_file, output_file, seq_type):
             filter_status = fields[6]
             info = fields[7]
             
-            # Parse INFO field
             info_dict = dict(item.split('=') for item in info.split(';'))
             support_read = float(info_dict.get('SUPREAD', 0))
             mismatches = int(info_dict.get('NM', 0))
             vaf = float(info_dict.get('VAF', 0))
             mq = int(info_dict.get('MQ', 0))
 
-            # Calculate score
             score = calculate_score(mismatches, vaf, mq, seq_type)
 
-            # Determine filter status
             if score < 40.00:
                 filter_status = 'LowQuality'
             else:
                 filter_status = 'PASS'
             
-            # Update QUAL field with score
             qual = f"{score:.2f}"
 
-            # Update INFO field with VAF
             info_dict['VAF'] = f'{vaf:.2f}'
             updated_info = ';'.join([f'{key}={value}' for key, value in info_dict.items()])
 
-            # Write the updated VCF line
             updated_line = '\t'.join([
                 chr_value,
                 str(pos),
