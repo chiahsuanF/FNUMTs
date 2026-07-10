@@ -4,8 +4,6 @@ import pysam
 from fnumts_check import parse_args
 from collections import defaultdict
 
-#from io import StringIO
-
 
 def sam_to_paf(sam_file, paf_file, seq_type):
     passing_reads = []
@@ -41,8 +39,6 @@ def sam_to_paf(sam_file, paf_file, seq_type):
             ]
 
             paffile.write('\t'.join(paf_line) + '\n')
-
-            # Check if the read passes the criteria for further processing
             if target_name == 'chrM':
                 query_coverage = (query_end - query_start) / query_length * 100
                 if (seq_type == 'hifi' and query_coverage > 45.00) or (seq_type == 'ont' and query_coverage > 39.00):
@@ -56,7 +52,6 @@ def generate_vcf_row(row, id_value):
     seq_length = len(row["seq"])
     chrMEPos = row["M_start"] + seq_length
 
-    # Adjust mitochondrial coordinates
     adj_M_start = row["M_start"]
     if adj_M_start > 16569:
         adj_M_start -= 16568
@@ -80,7 +75,6 @@ def generate_vcf_row(row, id_value):
         ref_allele = "N"
         alt_allele = row["seq"]
 
-    # Build VCF row
     vcf_data = [
         row["chr"],                 # CHROM
         row["start_pos"],           # POS
@@ -97,7 +91,6 @@ def generate_vcf_row(row, id_value):
 
     return "\t".join(map(str, vcf_data))
 
-
 def process_read(read, snp1):
     Ms = read.reference_start if read.reference_start else 0
     nm_tag = next((value for tag, value in read.get_tags() if tag == "NM"), "NA")
@@ -105,9 +98,6 @@ def process_read(read, snp1):
 
 def write_chrM_read(snp1, read, pos, nm_tag):
     snp1.write(f"{read.query_name}\t{read.query_sequence}\t{read.mapping_quality}\t{pos + 1}\t{nm_tag}\n")
-
-
-##########
 
 def get_depth(bam_filename, chrom, pos,
               min_base_quality=0,
@@ -205,14 +195,11 @@ def parse_info(info):
             d[item] = True
     return d
 
-
 def format_info(d):
     return ";".join(
         k if v is True else f"{k}={v}"
         for k, v in d.items()
     )
-
-
 
 def filter_best_primary_alignments(input_sam: str, output_sam: str) -> None:
     samfile = pysam.AlignmentFile(input_sam, "r")
