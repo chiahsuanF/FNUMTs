@@ -1,6 +1,6 @@
 # fnumts
 
-Finding NUMTs from long-read sequencing data.
+Finding NUMTs(FNUMTs) from long-read sequencing data.
 
 Author: Chia Hsuan(Josh) Fan
 
