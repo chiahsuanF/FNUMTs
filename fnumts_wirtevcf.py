@@ -11,27 +11,21 @@ def extract_chromosomes(file_data):
             chromosomes.add(fields[0])  # Assuming the chromosome is in the first column
     return list(chromosomes)
 
-
-# Function to create VCF header with FORMAT field and sample name
 def vcf_header(chromosomes, bampath):
     filedate = str(datetime.datetime.now()).split(' ')[0]
     vcfheader = pysam.VariantHeader()
     
-    # Extract the sample name by removing any leading '../'
     sample_name = os.path.basename(bampath)
 
     bamfile = pysam.AlignmentFile(bampath, 'r')
     vcfheader.add_sample(sample_name)
     
-    # Add general headers
     vcfheader.add_meta('source', 'Fnumts')
     vcfheader.add_meta('fileDate', filedate)
 
-    # Add contig lines for each chromosome
     for chrom in chromosomes:
         vcfheader.add_line(f'##contig=<ID={chrom}>')
 
-    # Add INFO fields
     vcfheader.add_meta('INFO', items=[('ID', 'CHR'), ('Number', 1), ('Type', 'String'), ('Description', 'Chromosome where the NUMT sequence is located')])
     vcfheader.add_meta('INFO', items=[('ID', 'LEN'), ('Number', 1), ('Type', 'Integer'), ('Description', 'Length of the NUMT sequence in base pairs')])
     vcfheader.add_meta('INFO', items=[('ID', 'SUPREAD'), ('Number', 1), ('Type', 'Integer'), ('Description', 'Number of supporting reads for the NUMT sequence')])
@@ -55,25 +49,19 @@ def vcf_header(chromosomes, bampath):
 def add_format_and_sample_data(file_data):
     new_lines = []
     
-    # Split the file into lines
     for line in file_data.splitlines():
         # Skip the header line
         if line.startswith("#CHROM"):
             new_lines.append(line + '\tFORMAT\tSAMPLE')
             continue
         
-        # Split the VCF data fields
         fields = line.split('\t')
-        
-        # Extract relevant INFO fields
         info_field = fields[7]  # INFO field is the 8th column
         info_dict = {kv.split('=')[0]: kv.split('=')[1] for kv in info_field.split(';')}
-        
         vaf = float(info_dict.get('VAF', 0))  # Extract VAF
         depth = int(float(info_dict.get('DEPTH', '0')))
         supread = info_dict.get('SUPREAD', '0')  # Extract SUPREAD
 
-        # Calculate the GT value based on VAF
         if vaf < 0.3:
             gt = '0/0'
         elif 0.3 <= vaf <= 0.69:
@@ -81,13 +69,10 @@ def add_format_and_sample_data(file_data):
         else:
             gt = '1/1'
         
-        # Format: GT:DP:AD
         format_value = 'GT:DP:AD'
         sample_value = f'{gt}:{depth}:{supread}'
         
-        # Append the new line with FORMAT and SAMPLE
         new_line = line + f'\t{format_value}\t{sample_value}'
         new_lines.append(new_line)
     
-    # Join the new lines back into the file data
     return '\n'.join(new_lines)
