@@ -4,7 +4,7 @@ import os, psutil, glob, time, resource, argparse, re, sys, subprocess, pysam, t
 import pandas as pd
 from multiprocessing import Pool, cpu_count
 
-import fnumts_check, fnumts_cluster, fnumts_bedtools, fnumts_del, fnumts_writevcf, fnumts_sortcigar, fnumts_process, calculate, fnumts_generate
+import fnumts_check, fnumts_cluster, fnumts_bedtools, fnumts_del, fnumts_writevcf, fnumts_sortcigar, fnumts_process, fnumts_calculate, fnumts_generate
 
 # ---------------------------------------------------------
 # Step 1: Setup
