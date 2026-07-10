@@ -9,10 +9,6 @@ def log(msg):
     print(f"[{t}] {msg}")
 
 def process_chr(tf_name_c):
-    """
-    Load a chromosome temp file, sort by start_pos, compute end_pos,
-    and return rows as list of lists. Deletes temp file afterward.
-    """
     tf_name, chrom = tf_name_c
     if os.path.getsize(tf_name) == 0:
         return []
@@ -27,15 +23,7 @@ def process_chr(tf_name_c):
     os.remove(tf_name)
     return result
 
-# -------------------------
-# Main function
-# -------------------------
 def sort_and_filter_cigar_data(args, writepath):
-    """
-    Hybrid memory-efficient version.
-    - Small files: read fully in memory, filter, sort, write.
-    - Large files: chunked read, per-chromosome temp files, parallel sort.
-    """
     csv.field_size_limit(100000000)
 
     inpath = os.path.join(writepath, '51_cigar.txt')
@@ -45,10 +33,6 @@ def sort_and_filter_cigar_data(args, writepath):
     first_column = pd.read_csv(inpath, sep="\t", header=None, usecols=[0], dtype=str)
     chr_list2 = sorted(first_column[0].unique(), key=lambda x:
                     (not x[3:].isdigit(), int(x[3:]) if x[3:].isdigit() else 1e9))
-    """
-    chr_list2 = [f"chr{i}" for i in range(1, 23)] + ["chrX", "chrY"]
-
-    """
 
     if not os.path.exists(inpath):
         raise FileNotFoundError(inpath)
@@ -56,9 +40,6 @@ def sort_and_filter_cigar_data(args, writepath):
     file_size_gb = os.path.getsize(inpath) / 1e9
     min_len = int(args.length)
 
-    # -------------------------
-    # LIGHTWEIGHT version for small files
-    # -------------------------
     if file_size_gb <= 2:  # threshold in GB, adjust as needed
         df = pd.read_csv(
             inpath, sep='\t', header=None,
@@ -76,9 +57,6 @@ def sort_and_filter_cigar_data(args, writepath):
         )
         return outpath
 
-    # -------------------------
-    # CHUNKED + per-chromosome + multi-CPU for large files
-    # -------------------------
     tmpfiles = {c: tempfile.NamedTemporaryFile(delete=False, mode="w") for c in chr_list2}
     chunksize = 1_000_000
 
@@ -101,16 +79,10 @@ def sort_and_filter_cigar_data(args, writepath):
     for f in tmpfiles.values():
         f.close()
 
-    # -------------------------
-    # Parallel sorting per chromosome
-    # -------------------------
     cpu_num = min(args.threads, len(chr_list2))
     with Pool(cpu_num) as pool:
         results = pool.map(process_chr, [(tmpfiles[c].name, c) for c in chr_list2])
 
-    # -------------------------
-    # Write final output
-    # -------------------------
     with open(outpath, "w") as outfile:
         for res in results:
             if len(res) > 0:
@@ -119,7 +91,6 @@ def sort_and_filter_cigar_data(args, writepath):
 
     return outpath
 
-# wtdbg2
 def run_parallel_task(task_list, func, max_threads=None):
     if not task_list:
         print("[INFO] No tasks, skipping")
@@ -145,26 +116,17 @@ def run_wtdbg2(k):
     os.system(f"wtpoa-cns -t 4 -q -i {prefix}.wtdbg.ctg.lay.gz -fo {prefix}.align.fa")
     os.system(f"sed 's/ctg[0-9]\\+ len=[0-9]\\+/{prefix}/' {prefix}.align.fa > {prefix}.rename.fa")
 
-# bsalign
 def run_bsalign(k):
     prefix = k.replace(".bs.fa", "")
     out_align = f"{prefix}.align.fa"
     out_rename = f"{prefix}.rename.fa"
 
-    # Step 1: bsalign poa
     os.system(f"bsalign poa {k} -o {out_align}")
-
-    # Step 2: rename header
     os.system(f"sed 's/cns_seq/{prefix}/' {out_align} > {out_rename}")
 
     return out_rename
 
 def process_bed_file(file_path, output_path, max_distance, support_read, chr_filter):
-    """
-    Read bed-like file, merge intervals, filter by support and chromosome list, write result.
-    Returns the output_path on success.
-    """
-    # defensive: check input exists
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"process_bed_file: input does not exist: {file_path}")
 
@@ -185,12 +147,7 @@ def process_bed_file(file_path, output_path, max_distance, support_read, chr_fil
     return output_path
 
 def run_parallel_merge(writepath, args, chr_list2, threads=None):
-    """
-    Build tasks for merging intervals and run them in multiprocessing.
-    Skip tasks whose input files are missing and log warnings instead of crashing.
-    """
     tasks = []
-
     input_53_srt = os.path.join(writepath, '53_cut_3.srt.txt')
     output_54_sdtin = os.path.join(writepath, '54_sdtin.txt')
     if os.path.exists(input_53_srt):
@@ -214,7 +171,6 @@ def run_parallel_merge(writepath, args, chr_list2, threads=None):
     log(f"[INFO] Running merge with {nprocs} worker(s) on {len(tasks)} task(s)")
 
     outputs = []
-    # Use apply_async and capture exceptions inside worker to avoid silent crash
     with Pool(processes=nprocs) as pool:
         async_results = []
         for t in tasks:
@@ -234,13 +190,9 @@ def run_parallel_merge(writepath, args, chr_list2, threads=None):
     return outputs
 
 def _worker_safe_process_bed_file(file_path, output_path, max_distance, support_read, chr_filter):
-    """
-    Wrapper executed in worker to call process_bed_file and surface errors.
-    """
     try:
         return process_bed_file(file_path, output_path, max_distance, support_read, chr_filter)
     except Exception as e:
-        # Convert to explicit exception so parent process sees it
         raise RuntimeError(f"process_bed_file failed for {file_path} -> {output_path}: {str(e)}")
 
 def process_intersection(a_file, b_file, out_file):
