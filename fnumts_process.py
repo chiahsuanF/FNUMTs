@@ -6,7 +6,6 @@ from multiprocessing import Pool
 from functools import partial
 from tqdm import tqdm
 
-
 def extract_and_sort_columns(df):
     selected_columns = ["chr", "sp1", "depth", "INS",  "avg_MQ", "len", "seq"]
     sorted_df = df[selected_columns].sort_values(by=["chr", "sp1", "len"])
@@ -16,17 +15,11 @@ def read_and_process_data(input_file, chr_list):
     df = pd.read_csv(input_file, sep="\t", header=None)
     df.columns = ["chr", "sp1", "ep1", "depth", "chr2", "sp2", "ep2", "INS", "MQ", "len", "seq"]
 
-    # 🔥 recompute support reads (this is what you want)
     df['support_reads'] = df.groupby(['chr', 'sp1', 'ep1']).transform('size')
-
-    # replace old depth
     df['depth'] = df['support_reads']
-
-    # average MQ (your existing logic)
     df['avg_MQ'] = df.groupby(['chr', 'sp1'])['MQ'].transform('mean').astype(int)
 
     sorted_df = extract_and_sort_columns(df)
-
     sorted_df["chr"] = sorted_df["chr"].astype("category")
     sorted_df["chr"] = sorted_df["chr"].cat.set_categories(chr_list)
 
@@ -38,6 +31,8 @@ def read_data(input_file):
     return pre_data
 
 def preprocess_and_write_wt(pbsw_file, read2_file):
+
+
     if os.stat(pbsw_file).st_size == 0:
         print(f"{pbsw_file} is empty. Skipping preprocessing.")
         return []
@@ -53,9 +48,7 @@ def preprocess_and_write_wt(pbsw_file, read2_file):
     pbsw_index = 0
     read2_index = 0
 
-    # Store sequences in memory first
-    seq_dict = {}   # file_name -> list of fasta records
-
+    seq_dict = {}   
     while pbsw_index < len(pbsw1) and read2_index < len(read2):
         pbsw_line = pbsw1.iloc[pbsw_index]
         read2_line = read2.iloc[read2_index]
@@ -153,9 +146,9 @@ def preprocess_and_write_bs(pbsw_file, read2_file):
 
 def run_cmd(cmd):
     subprocess.run(cmd, shell=True, check=True)
-    
+
 def run_wtdbg2(file, threads):
-    prefix = file[:-3]  # remove .fa
+    prefix = file[:-3]  
     lay = f"{prefix}.wtdbg.ctg.lay.gz"
 
     try:
@@ -191,7 +184,7 @@ def run_wtdbg2(file, threads):
     except Exception as e:
         print(f"[ERROR] Unexpected error for {prefix}: {e}")
         return prefix, "ERROR"
-
+    
 def run_bsalign(file, threads):
     if not os.path.exists(file) or os.stat(file).st_size == 0:
         print(f"Skipping empty/missing file: {file}")
