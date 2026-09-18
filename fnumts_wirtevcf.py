@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 
-import pysam, datetime, sys, os, argparse
+import pysam
+import datetime
+import sys
+import os
+import argparse
+
 
 def extract_chromosomes(file_data):
-    # Assuming chromosomes are in the #CHROM column
     chromosomes = set()
     for line in file_data.splitlines():
         if not line.startswith("#"):
             fields = line.split('\t')
-            chromosomes.add(fields[0])  # Assuming the chromosome is in the first column
+            chromosomes.add(fields[0])  
     return list(chromosomes)
 
 def vcf_header(chromosomes, bampath):
@@ -41,7 +45,6 @@ def vcf_header(chromosomes, bampath):
     vcfheader.add_meta('FORMAT', items=[('ID',"DP"), ('Number',1), ('Type','Integer'),('Description','Total depth of coverage at the NUMT breakpoints')])
     vcfheader.add_meta('FORMAT', items=[('ID',"AD"), ('Number',1), ('Type','Integer'),('Description','Number of supporting reads for the NUMT sequence')])
     vcfheader.add_meta('FILTER', items=[('ID',"LowQuality"), ('Number',1), ('Type','String'),('Description','Low quality variant')])    
-    # Add command line info
     vcfheader.add_meta('CommandLine', ' '.join(sys.argv))
 
     return vcfheader
@@ -50,18 +53,18 @@ def add_format_and_sample_data(file_data):
     new_lines = []
     
     for line in file_data.splitlines():
-        # Skip the header line
         if line.startswith("#CHROM"):
             new_lines.append(line + '\tFORMAT\tSAMPLE')
             continue
         
         fields = line.split('\t')
-        info_field = fields[7]  # INFO field is the 8th column
+        
+        info_field = fields[7]  
         info_dict = {kv.split('=')[0]: kv.split('=')[1] for kv in info_field.split(';')}
-        vaf = float(info_dict.get('VAF', 0))  # Extract VAF
+        
+        vaf = float(info_dict.get('VAF', 0))  
         depth = int(float(info_dict.get('DEPTH', '0')))
-        supread = info_dict.get('SUPREAD', '0')  # Extract SUPREAD
-
+        supread = info_dict.get('SUPREAD', '0')  
         if vaf < 0.3:
             gt = '0/0'
         elif 0.3 <= vaf <= 0.69:
