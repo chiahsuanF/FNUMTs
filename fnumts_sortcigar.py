@@ -2,7 +2,10 @@
 
 import pandas as pd
 from multiprocessing import Pool, cpu_count
-import os, time, traceback, csv, tempfile, fnumts_bedtools
+import os, time, traceback, csv, tempfile
+
+from fnumts_bedtools import *
+
 
 def log(msg):
     t = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -23,6 +26,9 @@ def process_chr(tf_name_c):
     os.remove(tf_name)
     return result
 
+# -------------------------
+# Main function
+# -------------------------
 def sort_and_filter_cigar_data(args, writepath):
     csv.field_size_limit(100000000)
 
@@ -34,12 +40,16 @@ def sort_and_filter_cigar_data(args, writepath):
     chr_list2 = sorted(first_column[0].unique(), key=lambda x:
                     (not x[3:].isdigit(), int(x[3:]) if x[3:].isdigit() else 1e9))
 
+
     if not os.path.exists(inpath):
         raise FileNotFoundError(inpath)
 
     file_size_gb = os.path.getsize(inpath) / 1e9
     min_len = int(args.length)
 
+    # -------------------------
+    # LIGHTWEIGHT version for small files
+    # -------------------------
     if file_size_gb <= 2:  # threshold in GB, adjust as needed
         df = pd.read_csv(
             inpath, sep='\t', header=None,
@@ -57,6 +67,9 @@ def sort_and_filter_cigar_data(args, writepath):
         )
         return outpath
 
+    # -------------------------
+    # CHUNKED + per-chromosome + multi-CPU for large files
+    # -------------------------
     tmpfiles = {c: tempfile.NamedTemporaryFile(delete=False, mode="w") for c in chr_list2}
     chunksize = 1_000_000
 
@@ -79,10 +92,16 @@ def sort_and_filter_cigar_data(args, writepath):
     for f in tmpfiles.values():
         f.close()
 
+    # -------------------------
+    # Parallel sorting per chromosome
+    # -------------------------
     cpu_num = min(args.threads, len(chr_list2))
     with Pool(cpu_num) as pool:
         results = pool.map(process_chr, [(tmpfiles[c].name, c) for c in chr_list2])
 
+    # -------------------------
+    # Write final output
+    # -------------------------
     with open(outpath, "w") as outfile:
         for res in results:
             if len(res) > 0:
@@ -123,7 +142,6 @@ def run_bsalign(k):
 
     os.system(f"bsalign poa {k} -o {out_align}")
     os.system(f"sed 's/cns_seq/{prefix}/' {out_align} > {out_rename}")
-
     return out_rename
 
 def process_bed_file(file_path, output_path, max_distance, support_read, chr_filter):
@@ -133,11 +151,9 @@ def process_bed_file(file_path, output_path, max_distance, support_read, chr_fil
     bed_input = pd.read_csv(file_path, sep='\t', header=None, engine='python', comment='#')
     bed = bed_input.values.tolist()
 
-    # merge_intervals should be provided by your fnumts_bedtools module
     merged_output = merge_intervals(bed, int(max_distance))
     output1 = pd.DataFrame(merged_output)
     if output1.shape[1] < 4:
-        # unexpected output from merge_intervals
         raise ValueError("merge_intervals returned unexpected shape: " + repr(output1.shape))
 
     output2 = output1[output1[3] >= int(support_read)].copy()
@@ -147,7 +163,9 @@ def process_bed_file(file_path, output_path, max_distance, support_read, chr_fil
     return output_path
 
 def run_parallel_merge(writepath, args, chr_list2, threads=None):
+
     tasks = []
+
     input_53_srt = os.path.join(writepath, '53_cut_3.srt.txt')
     output_54_sdtin = os.path.join(writepath, '54_sdtin.txt')
     if os.path.exists(input_53_srt):
@@ -171,6 +189,7 @@ def run_parallel_merge(writepath, args, chr_list2, threads=None):
     log(f"[INFO] Running merge with {nprocs} worker(s) on {len(tasks)} task(s)")
 
     outputs = []
+    # Use apply_async and capture exceptions inside worker to avoid silent crash
     with Pool(processes=nprocs) as pool:
         async_results = []
         for t in tasks:
@@ -193,6 +212,7 @@ def _worker_safe_process_bed_file(file_path, output_path, max_distance, support_
     try:
         return process_bed_file(file_path, output_path, max_distance, support_read, chr_filter)
     except Exception as e:
+        # Convert to explicit exception so parent process sees it
         raise RuntimeError(f"process_bed_file failed for {file_path} -> {output_path}: {str(e)}")
 
 def process_intersection(a_file, b_file, out_file):
