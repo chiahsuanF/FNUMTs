@@ -2,8 +2,11 @@
 
 import pysam, os, multiprocessing
 
-
 TARGET_CHROMOSOMES = [f"chr{i}" for i in range(1, 23)] + ["chrX", "chrY"]
+
+# -----------------------------
+# Helper functions
+# -----------------------------
 
 def write_ins(ct, line, s, r, length):
     seq = line.query_sequence[r:r+length]
@@ -13,7 +16,6 @@ def write_del(cd, line, s, length):
     cd.write(f"{line.reference_name}\t{s+1}\t{s+length}\t{line.mapping_quality}\tDEL\t{length}\n")
 
 def calculate_end(line):
-    """Calculate reference end position (0-based, exclusive)."""
     pos = line.reference_start
 
     if line.cigartuples:
@@ -35,17 +37,14 @@ def extract_soft_clips(line):
             elif op in (0, 1, 7, 8):  # M, I, =, X
                 r += length
             # D does not consume query
-
     return scs
 
 def write_soft(ct, line, scs):
     end_pos = calculate_end(line)
 
     for r, length in scs:
-        # left soft clip → before alignment
         if r == 0:
             start = line.reference_start + 1
-        # right soft clip → after alignment
         else:
             start = end_pos + 1
 
@@ -55,11 +54,8 @@ def write_soft(ct, line, scs):
             f"{start}\t{start + length - 1}\t"
             f"{line.mapping_quality}\tSC\t{length}\t{seq}\n"
         )
-
+        
 def process_line(ct, cd, line, args):
-    """
-    Process CIGAR string for INS and DEL events.
-    """
     s = line.reference_start  # reference position (0-based)
     r = 0                     # query position
 
@@ -85,6 +81,10 @@ def process_line(ct, cd, line, args):
                 write_del(cd, line, s, length)
             s += length
 
+# -----------------------------
+# Worker function for multiprocessing
+# -----------------------------
+
 def worker(task):
     file_path, contig, out_prefix, args, is_cram, ref = task
     cigar_file = f"{out_prefix}_{contig}.cigar.txt"
@@ -104,6 +104,10 @@ def worker(task):
     aln.close()
     return cigar_file, del_file
 
+# -----------------------------
+# Main function to run parallel processing
+# -----------------------------
+
 def run_parallel(file_path, outpath, args, is_cram=False, ref=None):
     out_prefix = os.path.join(outpath, "51")
     tasks = []
@@ -117,9 +121,11 @@ def run_parallel(file_path, outpath, args, is_cram=False, ref=None):
         tasks.append((file_path, contig, out_prefix, args, is_cram, ref))
     aln.close()
 
+    # Run one CPU per chromosome (or limit to threads)
     with multiprocessing.Pool(processes=min(args.threads, len(tasks))) as pool:
         results = pool.map(worker, tasks)
 
+    # Merge temporary files
     cigar_out = os.path.join(outpath, "51_cigar.txt")
     del_out = os.path.join(outpath, "51_cigar_del.txt")
     with open(cigar_out, "w") as ct, open(del_out, "w") as cd:
