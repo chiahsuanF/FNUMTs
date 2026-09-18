@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-
-
 def save_sorted_data(sorted_df, output_file):
     sorted_df.to_csv(output_file, sep='\t', header=None, index=False)
 
@@ -26,16 +24,16 @@ def calculate_score(mismatches, vaf, mq, seq_type, max_mismatches=50, max_mq=60,
         return min(mq / max_mq, 1)
 
     normalized_mismatches = normalize_mismatches(mismatches, max_mismatches)
-    normalized_vaf = normalize_vaf(vaf)  # Ensure VAF is capped at 1
+    normalized_vaf = normalize_vaf(vaf)  
     normalized_mq = normalize_mq(mq, max_mq)
-    
+
     score = (
         (weights[0] * normalized_mismatches +
         weights[1] * normalized_vaf +
          weights[2] * normalized_mq) * 100
     )
     return score
-    
+
 def process_vcf(input_file, output_file, seq_type):
     with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
         for line in infile:
