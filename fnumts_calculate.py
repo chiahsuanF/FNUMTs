@@ -4,7 +4,6 @@ import pysam
 from fnumts_check import parse_args
 from collections import defaultdict
 
-
 def sam_to_paf(sam_file, paf_file, seq_type):
     passing_reads = []
     with pysam.AlignmentFile(sam_file, "r") as samfile, open(paf_file, 'w') as paffile:
@@ -21,7 +20,7 @@ def sam_to_paf(sam_file, paf_file, seq_type):
             target_length = int(samfile.get_reference_length(target_name))//2
             target_start = read.reference_start
             target_end = read.reference_end
-            num_mismatches = read.get_tag("NM")  # Number of mismatches
+            num_mismatches = read.get_tag("NM")  
             alignment_block_length = read.query_alignment_length
 
             paf_line = [
@@ -35,10 +34,11 @@ def sam_to_paf(sam_file, paf_file, seq_type):
                 str(target_start),
                 str(target_end),
                 str(alignment_block_length),
-                str(num_mismatches)  # Mismatches
+                str(num_mismatches)  
             ]
 
             paffile.write('\t'.join(paf_line) + '\n')
+
             if target_name == 'chrM':
                 query_coverage = (query_end - query_start) / query_length * 100
                 if (seq_type == 'hifi' and query_coverage > 45.00) or (seq_type == 'ont' and query_coverage > 39.00):
@@ -60,7 +60,6 @@ def generate_vcf_row(row, id_value):
     if chrMEPos > 16569:
         adj_chrMEPos -= 16568
 
-    # Normalize and classify variant type
     type_str = str(row["type"]).strip().upper()
     if type_str in ["INS", "SC"]:
         vcf_type = "INS"
@@ -91,6 +90,7 @@ def generate_vcf_row(row, id_value):
 
     return "\t".join(map(str, vcf_data))
 
+
 def process_read(read, snp1):
     Ms = read.reference_start if read.reference_start else 0
     nm_tag = next((value for tag, value in read.get_tags() if tag == "NM"), "NA")
@@ -104,7 +104,6 @@ def get_depth(bam_filename, chrom, pos,
               min_mapping_quality=0,
               reference=None):
     try:
-        # Open BAM or CRAM correctly
         if bam_filename.endswith(".cram"):
             if reference is None:
                 raise ValueError("CRAM requires reference FASTA")
@@ -114,7 +113,6 @@ def get_depth(bam_filename, chrom, pos,
         else:
             bamfile = pysam.AlignmentFile(bam_filename, "rb")
 
-        # Fix chr / non-chr mismatch
         if chrom not in bamfile.references:
             chrom_alt = chrom.replace("chr", "") if chrom.startswith("chr") else "chr" + chrom
             if chrom_alt in bamfile.references:
@@ -141,7 +139,6 @@ def get_depth(bam_filename, chrom, pos,
         return depth
 
     except Exception:
-        # pysam pileup iteration error → treat as zero depth
         return 0
 
 def process_vcf_and_filter(input_vcf, bam_filename, output_vcf, seq_type, reference=None):
@@ -195,6 +192,7 @@ def parse_info(info):
             d[item] = True
     return d
 
+
 def format_info(d):
     return ";".join(
         k if v is True else f"{k}={v}"
@@ -208,18 +206,15 @@ def filter_best_primary_alignments(input_sam: str, output_sam: str) -> None:
     best_alignment = {}
 
     for read in samfile.fetch(until_eof=True):
-        # Skip secondary or supplementary alignments
         if read.is_secondary or read.is_supplementary:
             continue
 
         name = read.query_name
         score = read.get_tag("AS") if read.has_tag("AS") else 0
 
-        # Keep read if no previous or current has better score
         if name not in best_alignment or score > best_alignment[name].get_tag("AS"):
             best_alignment[name] = read
 
-    # Write best alignments to output
     for read in best_alignment.values():
         out.write(read)
 
