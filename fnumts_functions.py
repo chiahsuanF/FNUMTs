@@ -4,7 +4,6 @@ import os, time
 import pandas as pd
 from multiprocessing import Pool, cpu_count
  
-
 def sort_and_filter_cigar_data(args, writepath):
     chr_list2 = [
         "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
@@ -18,7 +17,6 @@ def sort_and_filter_cigar_data(args, writepath):
     if not os.path.exists(input_file):
         raise FileNotFoundError(f"Missing input file: {input_file}")
 
-    # Read and filter insertions
     sort_test = pd.read_csv(
         input_file, sep="\t", header=None,
         names=["chr", "start_pos", "end", "MQ", "INS", "length", "seq"]
@@ -34,4 +32,3 @@ def sort_and_filter_cigar_data(args, writepath):
     newsort[["chr", "start_pos", "end_pos", "INS", "MQ", "length", "seq"]].to_csv(
         output_file, sep='\t', header=False, index=False
     )
-
