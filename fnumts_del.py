@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import os, fnumts_sortcigar
+import os 
 import pandas as pd
 from Bio import SeqIO
-
+from fnumts_sortcigar import *
 
 def count_del(args, writepath):
     import tempfile
@@ -53,6 +53,7 @@ def extract_and_sort_columns_del(df):
     sorted_df = df[selected_columns].sort_values(by=["chr2", "sp2", "len"])
     return sorted_df
 
+
 def read_and_process_data_del(input_file, chr_list):
     df = pd.read_csv(input_file, sep="\t", header=None) #MQ
     df.columns = ["chr", "sp1", "ep1", "depth", "chr2", "sp2", "ep2", "MQ", "DEL", "len"]
@@ -77,18 +78,15 @@ def read_and_process_data_del(input_file, chr_list):
 
 def sort_and_uniq(input_file, output_file, uniq_cols=None):
     df = pd.read_csv(input_file, sep="\t", header=None)
+    
     df[1] = pd.to_numeric(df[1], errors='coerce')
     df[2] = pd.to_numeric(df[2], errors='coerce')
     df_sorted = df.sort_values(by=[0, 1, 2])
+
     df_unique = df_sorted.drop_duplicates(subset=uniq_cols)
     df_unique.to_csv(output_file, sep="\t", index=False, header=False)
-
+ 
 def extract_subsequences_from_bed(fasta_file, bed_file, output_file):
-    """
-    Extract subsequences from a FASTA file based on BED coordinates.
-    Header format: chrom:start-end_length_idx
-    """
-    # Load reference genome sequences
     ref_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
 
     with open(bed_file) as bed, open(output_file, "w") as out_fa:
