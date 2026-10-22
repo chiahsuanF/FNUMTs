@@ -14,6 +14,7 @@ def save_to_fna(data, output_file):
     data.to_csv(output_file, sep='\n', header=False, index=False)
 
 def calculate_score(mismatches, vaf, mq, seq_type, max_mismatches=50, max_mq=60, weights=(0.3, 0.4, 0.3)):
+
     def normalize_mismatches(mismatches, max_mismatches):
         return 1 - min(mismatches / max_mismatches, 1)
 
@@ -24,7 +25,7 @@ def calculate_score(mismatches, vaf, mq, seq_type, max_mismatches=50, max_mq=60,
         return min(mq / max_mq, 1)
 
     normalized_mismatches = normalize_mismatches(mismatches, max_mismatches)
-    normalized_vaf = normalize_vaf(vaf)  
+    normalized_vaf = normalize_vaf(vaf)  # Ensure VAF is capped at 1
     normalized_mq = normalize_mq(mq, max_mq)
 
     score = (
@@ -51,6 +52,7 @@ def process_vcf(input_file, output_file, seq_type):
             filter_status = fields[6]
             info = fields[7]
             
+            # Parse INFO field
             info_dict = dict(item.split('=') for item in info.split(';'))
             support_read = float(info_dict.get('SUPREAD', 0))
             mismatches = int(info_dict.get('NM', 0))
