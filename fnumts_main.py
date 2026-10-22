@@ -12,7 +12,7 @@ from fnumts_del import *
 from fnumts_writevcf import *
 from fnumts_sortcigar import *
 from fnumts_process import *
-from calculate import *
+from fnumts_calculate import *
 from fnumts_generate import *
 from fnumts_functions import *
 
