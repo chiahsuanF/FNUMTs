@@ -35,7 +35,6 @@ def count_del(args, writepath):
     for f in tmpfiles.values():
         f.close()
 
-    # final sort + concat
     with open(outpath, "w") as outfile:
         for c in chr_list2:
             tf = tmpfiles[c].name
@@ -77,16 +76,22 @@ def read_and_process_data_del(input_file, chr_list):
     return sorted_df
 
 def sort_and_uniq(input_file, output_file, uniq_cols=None):
+
     df = pd.read_csv(input_file, sep="\t", header=None)
     
+    # Sort by first 3 columns (chr, start, end)
     df[1] = pd.to_numeric(df[1], errors='coerce')
     df[2] = pd.to_numeric(df[2], errors='coerce')
     df_sorted = df.sort_values(by=[0, 1, 2])
 
+    # Drop duplicates based on selected columns
     df_unique = df_sorted.drop_duplicates(subset=uniq_cols)
+
+    # Write to file
     df_unique.to_csv(output_file, sep="\t", index=False, header=False)
- 
+
 def extract_subsequences_from_bed(fasta_file, bed_file, output_file):
+
     ref_dict = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
 
     with open(bed_file) as bed, open(output_file, "w") as out_fa:
