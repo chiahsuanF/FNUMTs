@@ -6,12 +6,15 @@ import os, time, traceback, csv, tempfile
 
 from fnumts_bedtools import *
 
-
 def log(msg):
     t = time.strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{t}] {msg}")
 
 def process_chr(tf_name_c):
+    """
+    Load a chromosome temp file, sort by start_pos, compute end_pos,
+    and return rows as list of lists. Deletes temp file afterward.
+    """
     tf_name, chrom = tf_name_c
     if os.path.getsize(tf_name) == 0:
         return []
@@ -30,6 +33,7 @@ def process_chr(tf_name_c):
 # Main function
 # -------------------------
 def sort_and_filter_cigar_data(args, writepath):
+
     csv.field_size_limit(100000000)
 
     inpath = os.path.join(writepath, '51_cigar.txt')
@@ -47,9 +51,6 @@ def sort_and_filter_cigar_data(args, writepath):
     file_size_gb = os.path.getsize(inpath) / 1e9
     min_len = int(args.length)
 
-    # -------------------------
-    # LIGHTWEIGHT version for small files
-    # -------------------------
     if file_size_gb <= 2:  # threshold in GB, adjust as needed
         df = pd.read_csv(
             inpath, sep='\t', header=None,
@@ -67,9 +68,6 @@ def sort_and_filter_cigar_data(args, writepath):
         )
         return outpath
 
-    # -------------------------
-    # CHUNKED + per-chromosome + multi-CPU for large files
-    # -------------------------
     tmpfiles = {c: tempfile.NamedTemporaryFile(delete=False, mode="w") for c in chr_list2}
     chunksize = 1_000_000
 
@@ -92,16 +90,10 @@ def sort_and_filter_cigar_data(args, writepath):
     for f in tmpfiles.values():
         f.close()
 
-    # -------------------------
-    # Parallel sorting per chromosome
-    # -------------------------
     cpu_num = min(args.threads, len(chr_list2))
     with Pool(cpu_num) as pool:
         results = pool.map(process_chr, [(tmpfiles[c].name, c) for c in chr_list2])
 
-    # -------------------------
-    # Write final output
-    # -------------------------
     with open(outpath, "w") as outfile:
         for res in results:
             if len(res) > 0:
@@ -140,11 +132,16 @@ def run_bsalign(k):
     out_align = f"{prefix}.align.fa"
     out_rename = f"{prefix}.rename.fa"
 
+    # Step 1: bsalign poa
     os.system(f"bsalign poa {k} -o {out_align}")
+
+    # Step 2: rename header
     os.system(f"sed 's/cns_seq/{prefix}/' {out_align} > {out_rename}")
+
     return out_rename
 
 def process_bed_file(file_path, output_path, max_distance, support_read, chr_filter):
+
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"process_bed_file: input does not exist: {file_path}")
 
@@ -154,6 +151,7 @@ def process_bed_file(file_path, output_path, max_distance, support_read, chr_fil
     merged_output = merge_intervals(bed, int(max_distance))
     output1 = pd.DataFrame(merged_output)
     if output1.shape[1] < 4:
+        # unexpected output from merge_intervals
         raise ValueError("merge_intervals returned unexpected shape: " + repr(output1.shape))
 
     output2 = output1[output1[3] >= int(support_read)].copy()
@@ -209,6 +207,9 @@ def run_parallel_merge(writepath, args, chr_list2, threads=None):
     return outputs
 
 def _worker_safe_process_bed_file(file_path, output_path, max_distance, support_read, chr_filter):
+    """
+    Wrapper executed in worker to call process_bed_file and surface errors.
+    """
     try:
         return process_bed_file(file_path, output_path, max_distance, support_read, chr_filter)
     except Exception as e:
